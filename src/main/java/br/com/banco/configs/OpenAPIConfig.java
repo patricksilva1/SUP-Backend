@@ -20,7 +20,7 @@ public class OpenAPIConfig {
 
     @Bean
     OpenAPI myOpenAPI() {
-        String activeProfile = environment.getActiveProfiles()[0];
+//        String activeProfile = environment.getActiveProfiles()[0];
         String devUrl = environment.getProperty("supera.openapi.dev-url");
         String prodUrl = environment.getProperty("supera.openapi.prod-url");
 

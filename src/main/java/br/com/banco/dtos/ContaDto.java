@@ -1,23 +1,16 @@
-package br.com.banco.entities;
+package br.com.banco.dtos;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Entity
-@Table(name = "conta")
-public class Conta {
+public class ContaDto {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,31 +26,7 @@ public class Conta {
 	@Column(name = "data_de_criacao")
 	private LocalDateTime dataDeCriacao;
 
-	@Column(name = "saldo", nullable = false, columnDefinition = "DECIMAL(20,2)")
-	private Double saldo;
-
-	@OneToMany(mappedBy = "conta")
-	private List<Transferencia> transferencias = new ArrayList<>();
-
-	public Conta() {
-	}
-
-	public Conta(Long id, String nomeResponsavel, LocalDateTime dataDeCriacao, Double saldo, List<Transferencia> transferencias) {
-		this.id = id;
-		this.nomeResponsavel = nomeResponsavel;
-		this.dataDeCriacao = dataDeCriacao;
-		this.saldo = saldo;
-		this.transferencias = transferencias;
-	}
-
 	// Getters and Setters
-	public Double getSaldo() {
-		return saldo;
-	}
-
-	public void setSaldo(Double saldo) {
-		this.saldo = saldo;
-	}
 
 	public Long getId() {
 		return id;
@@ -81,13 +50,5 @@ public class Conta {
 
 	public void setDataDeCriacao(LocalDateTime dataDeCriacao) {
 		this.dataDeCriacao = dataDeCriacao;
-	}
-
-	public List<Transferencia> getTransferencias() {
-		return transferencias;
-	}
-
-	public void setTransferencias(List<Transferencia> transferencias) {
-		this.transferencias = transferencias;
 	}
 }
