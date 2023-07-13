@@ -14,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import br.com.banco.enums.Operation;
 
 @Entity
@@ -35,12 +37,8 @@ public class Transferencia {
 	@NotNull
 	private Operation tipo;
 
+	// TODO: Verificar se a prova vai mesmo autorizar o nome do operador ser nulo.
 
-	
-	//TODO: Verificar se a prova vai mesmo autorizar o nome do operador ser nulo.
-	
-	
-	
 	@Column(name = "nome_operador_transacao")
 	private String nomeOperadorTransacao;
 
@@ -49,5 +47,62 @@ public class Transferencia {
 
 	@ManyToOne
 	@JoinColumn(name = "conta_id")
+	@JsonIgnore // Para evitar a serialização recursiva
 	private Conta conta;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public LocalDateTime getDataTransferencia() {
+		return dataTransferencia;
+	}
+
+	public void setDataTransferencia(LocalDateTime dataTransferencia) {
+		this.dataTransferencia = dataTransferencia;
+	}
+
+	public Double getValor() {
+		return valor;
+	}
+
+	public void setValor(Double valor) {
+		this.valor = valor;
+	}
+
+	public Operation getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(Operation tipo) {
+		this.tipo = tipo;
+	}
+
+	public String getNomeOperadorTransacao() {
+		return nomeOperadorTransacao;
+	}
+
+	public void setNomeOperadorTransacao(String nomeOperadorTransacao) {
+		this.nomeOperadorTransacao = nomeOperadorTransacao;
+	}
+
+	public Double getSaldoAtual() {
+		return saldoAtual;
+	}
+
+	public void setSaldoAtual(Double saldoAtual) {
+		this.saldoAtual = saldoAtual;
+	}
+
+	public Conta getConta() {
+		return conta;
+	}
+
+	public void setConta(Conta conta) {
+		this.conta = conta;
+	}
 }
