@@ -1,5 +1,9 @@
 # Processo Seletivo Java
 
+## Nota:
+
+Os importes como "javax" ao invés de seu sucessor "jakarta", estão de acordo com a versão proposta inicialmente no "pom.xml".
+
 ## Descrição 
 
 - Este teste consiste em construir uma camada de serviço, para uma operação muito realizada em bancos, para emissão de extrato bancário.
