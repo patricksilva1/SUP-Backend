@@ -1,7 +1,7 @@
 package br.com.banco.enums;
 
 public enum Operation {
-	DEPOSITO(1, "Deposito"), SAQUE(2, "Saque"), TRANSFERENCIA(3, "Transferencia");
+	DEPOSITO(1, "Deposito"), SAQUE(2, "Saque"), TRANSF_ENTRADA(3, "TransferenciaEntrada"), TRANSF_SAIDA(4, "TransferenciaSaida");
 
 	private final int id;
 

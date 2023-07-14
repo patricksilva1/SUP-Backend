@@ -1,14 +1,26 @@
 package br.com.banco.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import br.com.banco.repositories.ContaRepository;
+import br.com.banco.entities.Conta;
+import br.com.banco.entities.Transferencia;
+import br.com.banco.enums.Operation;
 
-@Service
-public class ContaService {
+public interface ContaService {
+	Conta criarConta(String nome);
 
-	@Autowired
-	private ContaRepository contaRepository;
+	void depositar(Long idConta, double valor);
+
+	void sacar(Long idConta, double valor);
+
+	void transferir(Long idContaOrigem, Long idContaDestino, double valor, Operation tipo);
+
+	public Conta obterContaPorId(Long id);
+
+	public List<Transferencia> buscarTransacoesPorPeriodoENome(LocalDateTime dataInicio, LocalDateTime dataFim, String nome);
+
+	public double calcularSaldoTotalPorNome(String nome);
 	
+	public double calcularSaldoPeriodoPorNome(LocalDateTime dataInicio, LocalDateTime dataFim, String nome);
 }

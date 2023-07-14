@@ -12,10 +12,10 @@ import org.springframework.data.repository.query.Param;
 
 import br.com.banco.entities.Transferencia;
 
-public interface TransferenciaRepository
-		extends JpaRepository<Transferencia, Long>, JpaSpecificationExecutor<Transferencia> {
+public interface TransferenciaRepository extends JpaRepository<Transferencia, Long>, JpaSpecificationExecutor<Transferencia> {
 
-//	List<Transferencia> findAll(Specification<Transferencia> spec);
+	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.nomeOperadorTransacao = :nomeOperador")
+	List<Transferencia> findByDataInicioAndNomeOperador(@Param("dataInicio") LocalDateTime dataInicio, @Param("nomeOperador") String nomeOperador);
 
 	@Query("SELECT t FROM Transferencia t WHERE t.conta.id = :numeroConta")
 	List<Transferencia> findByContaNumeroConta(Long numeroConta);
@@ -24,18 +24,13 @@ public interface TransferenciaRepository
 
 	List<Transferencia> findByNomeOperadorTransacao(String nomeOperador);
 
-//	List<Transferencia> findByDataTransferenciaBetweenAndNomeOperadorTransacao(LocalDateTime dataInicio, LocalDateTime dataFim, String nomeOperador);
-
-//	List<Transferencia> findByDataTransferenciaBetweenAndNomeOperadorTransacaoAndDataTransferenciaGreaterThanEqual(LocalDateTime dataInicio, LocalDateTime dataFim, String nomeOperador, LocalDateTime dataTransferenciaInicio);
-//	List<Transferencia> findByDataTransferenciaAfterAndNomeOperadorTransacao(LocalDateTime dataInicio, String nomeOperador);
-
-
 	List<Transferencia> findByContaId(Long contaId);
 
 	Page<Transferencia> findAll(Pageable pageable);
-
 	
-	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.nomeOperadorTransacao = :nomeOperador")
-	List<Transferencia> findByDataInicioAndNomeOperador(@Param("dataInicio") LocalDateTime dataInicio, @Param("nomeOperador") String nomeOperador);
-	
+	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.conta.nome = :nome")
+	List<Transferencia> buscarPorPeriodoENome(
+			@Param("dataInicio") LocalDateTime dataInicio,
+			@Param("dataFim") LocalDateTime dataFim, 
+			@Param("nome") String nome);
 }

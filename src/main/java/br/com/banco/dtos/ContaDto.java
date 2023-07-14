@@ -2,53 +2,56 @@ package br.com.banco.dtos;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 public class ContaDto {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_conta")
-	private Long id;
+    private Long id;
+    private String nome;
+    private LocalDateTime dataDeCriacao;
+    private Double saldo;
 
-	@NotNull
-	@Size(min = 3, max = 64)
-	@NotEmpty(message = "O nome não pode estar vazio, digite o seu nome por gentileza.")
-	@Column(name = "nome_responsavel")
-	private String nomeResponsavel;
+    // Construtores
 
-	@Column(name = "data_de_criacao")
-	private LocalDateTime dataDeCriacao;
+    public ContaDto() {
+    }
 
-	// Getters and Setters
+    public ContaDto(Long id, String nome, LocalDateTime dataDeCriacao, Double saldo) {
+        this.id = id;
+        this.nome = nome;
+        this.dataDeCriacao = dataDeCriacao;
+        this.saldo = saldo;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    // Getters e Setters
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getNomeResponsavel() {
-		return nomeResponsavel;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setNomeResponsavel(String nomeResponsavel) {
-		this.nomeResponsavel = nomeResponsavel;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public LocalDateTime getDataDeCriacao() {
-		return dataDeCriacao;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public void setDataDeCriacao(LocalDateTime dataDeCriacao) {
-		this.dataDeCriacao = dataDeCriacao;
-	}
+    public LocalDateTime getDataDeCriacao() {
+        return dataDeCriacao;
+    }
+
+    public void setDataDeCriacao(LocalDateTime dataDeCriacao) {
+        this.dataDeCriacao = dataDeCriacao;
+    }
+
+    public Double getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(Double saldo) {
+        this.saldo = saldo;
+    }
 }

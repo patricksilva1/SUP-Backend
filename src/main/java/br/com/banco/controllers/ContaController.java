@@ -1,78 +1,104 @@
 package br.com.banco.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.banco.dtos.ContaDto;
 import br.com.banco.entities.Conta;
-import br.com.banco.services.TransferenciaService;
-import br.com.banco.services.TransferenciaServiceImpl;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import br.com.banco.enums.Operation;
+import br.com.banco.services.ContaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "ACCOUNTS", description = "Endpoints Management.")
 @CrossOrigin(origins = "*", maxAge = 3600)
+
 @RestController
-@RequestMapping("api/v1/account")
+@RequestMapping("/api/v1/contas")
 public class ContaController {
-//	@Autowired
-//	private TransferenciaService transferenciaServiceImpl;
 
-	@Operation(summary = "Checa o status do Controller.", description = "Nos ajuda a Realizar a checagem do Controller.")
-	@GetMapping(value = "/status")
-	public String statusService(@Value("${local.server.port}") String port) {
+    private final ContaService contaService;
 
-		return String.format("Running at %s", port);
+    @Autowired
+    public ContaController(ContaService contaService) {
+        this.contaService = contaService;
+    }
+
+    // Criar Conta
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> criarConta(@RequestBody Map<String, Object> requestBody) {
+        String nome = (String) requestBody.get("nome");
+        if (nome == null || nome.isEmpty()) {
+            throw new IllegalArgumentException("O parâmetro 'nome' é obrigatório");
+        }
+
+        Conta novaConta = contaService.criarConta(nome);
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", novaConta.getId());
+        response.put("nome", novaConta.getNome());
+        response.put("dataDeCriacao", novaConta.getDataDeCriacao());
+        response.put("saldo", novaConta.getSaldo());
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // Depositar valor por id.
+    @PostMapping("/{id}/depositar")
+    public ResponseEntity<Void> depositar(@PathVariable Long id, @RequestParam double valor) {
+        if(id != null) {
+        	contaService.depositar(id, valor);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    // Sacar por id.
+    @PostMapping("/{id}/sacar")
+    public ResponseEntity<Void> sacar(@PathVariable Long id, @RequestParam double valor) {
+        contaService.sacar(id, valor);
+        return ResponseEntity.ok().build();
+    }
+
+    // Achar por Id
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> obterContaPorId(@PathVariable Long id) {
+		Conta conta = contaService.obterContaPorId(id);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("id", conta.getId());
+		response.put("nome", conta.getNome());
+		response.put("saldo", conta.getSaldo());
+
+		return (id !=null) ? ResponseEntity.ok().body(response) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
-	/*
-	 * api/v1/registrar - registrar api/v1/depositar/{id}/{valor} - depositar
-	 * api/v1/sacar/{id}/{valor} - sacar
-	 * api/v1/transferir/{idOrigem}/{valor}/{idDestino} - transferir
-	 * api/v1/transacoes/{id} - getAllTransactions 
-	 *  Paginado
-	 */
+    // TODO: CORRIGIR O TIPO para automatico.
+    // TRANSFERENCIA
+    @PostMapping("/{origem}/transferir/{destino}")
+    public ResponseEntity<Void> transferir(
+            @PathVariable("origem") Long idContaOrigem,
+            @PathVariable("destino") Long idContaDestino,
+            @RequestParam double valor,
+            @RequestParam Operation tipo) {
+        contaService.transferir(idContaOrigem, idContaDestino, valor, tipo);
+        return ResponseEntity.ok().build();
+    }
 
-	/*
-	 * /transferencias: Retorna todas as transferências sem nenhum filtro.
-		/transferencias?conta=<numero_conta>: Retorna todas as transferências relacionadas a um número de conta específico.
-		/transferencias?data_inicio=<data_inicio>&data_fim=<data_fim>: Retorna todas as transferências dentro de um período de tempo especificado.
-		/transferencias?operador=<nome_operador>: Retorna todas as transferências relacionadas a um operador específico.
-		/transferencias?data_inicio=<data_inicio>&data_fim=<data_fim>&operador=<nome_operador>: Retorna todas as transferências com base no período de tempo e operador especificados.
-	 */
-	
-	
-	
-	
-	
-	
-//	   @PostMapping(path = "/register")
-//	    public ResponseEntity<Void> registerAccount(@RequestBody ContaDto contaDto) {
-//
-//	        Conta conta = contaService.fromDto(contaDto);
-//
-//	        contaService.inserir(conta);
-//
-//	        return ResponseEntity.ok().build();
-//	    }
-
-//	@RequestMapping(value = "page", method = RequestMethod.GET)
-//	public ResponseEntity<Page<Transferencia>> findPage(@RequestParam(value = "page", defaultValue = "0") Integer page,
-//			@RequestParam(value = "filterDataInicio", defaultValue = "") String filterDataInicio,
-//			@RequestParam(value = "filterDataFim", defaultValue = "") String filterDataFim,
-//			@RequestParam(value = "filterNomeOperadorTransacao", defaultValue = "") String filterNomeOperadorTransacao,
-//			@RequestParam(value = "linesPerPage", defaultValue = "24") Integer linesPerPage,
-//			@RequestParam(value = "orderBy", defaultValue = "id") String orderBy,
-//			@RequestParam(value = "direction", defaultValue = "ASC") String direction) {
-//		Page<Transferencia> categorias = transferenciaServiceImpl.findPage(page, linesPerPage, orderBy, direction, filterDataInicio, filterDataFim, filterNomeOperadorTransacao);
-//		
-//		return ResponseEntity.ok().body(categorias);
-//	}
+    // Atualizar saldo sem salvar nas transferencias
+    // TODO: SALVAR NAS TRANSFERENCIAS COMO "SISTEMA"
+    @PutMapping("/{id}/saldo")
+    public ResponseEntity<Void> atualizarSaldo(@PathVariable Long id, @RequestParam double valor) {
+        contaService.depositar(id, valor);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -1,5 +1,6 @@
 package br.com.banco.controllers;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.banco.entities.Transferencia;
+import br.com.banco.services.ContaService;
 import br.com.banco.services.TransferenciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,8 +35,12 @@ public class TransferenciaController {
 	@Autowired
 	private TransferenciaService transferenciaService;
 
+	@Autowired
+	private ContaService contaService;
+
 	// Retorna todas as transferências relacionadas a um número de conta específico
 	// 1. A sua api deve fornecer os dados de transferência de acordo com o número da conta bacária.
+	// TODO: VERIFICAR OQUE ESSE METODO TA FAZENDO.
 	@Operation(summary = "Retorna todas as transferências relacionadas a um número de conta específico")
 	@GetMapping("/conta/{numeroConta}")
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorConta(
@@ -46,6 +53,7 @@ public class TransferenciaController {
 	
 	// Retorna todas as transferências sem nenhum filtro
 	// 2. Caso não seja informado nenhum filtro, retornar todos os dados de transferência.
+	// Retornar todas as transferencias existentes.
 	@Operation(summary = "Retorna todas as transferências sem nenhum filtro")
 	@GetMapping()
 	public ResponseEntity<List<Transferencia>> getAllTransferencias() {
@@ -59,37 +67,50 @@ public class TransferenciaController {
 	// 3. Caso seja informado um período de tempo, retornar todas as transferências relacionadas à aquele período de tempo.
     @Operation(summary = "Retorna todas as transferências dentro de um período de tempo especificado")
     @GetMapping("/periodo")
+    // TODO: ERROR DE CONVERSAO DE DATA
     public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
-    		@Parameter(description = "Data de início do período", example = "2022-01-01T00:00:00") @RequestParam LocalDateTime dataInicio,
-            @Parameter(description = "Data de fim do período", example = "2022-01-31T23:59:59") @RequestParam LocalDateTime dataFim) {
+//    		@Parameter(description = "Data de início do período", example = "01/01/2017")
+    		@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDateTime dataInicio,
+//            @Parameter(description = "Data de fim do período", example = "08/09/2023") 
+    		@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDateTime dataFim) {
         List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicio, dataFim);
         
         return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 	// Retorna todas as transferências relacionadas a um operador específico
-	@Operation(summary = "Retorna todas as transferências relacionadas a um operador específico")
+    // 4. Caso seja informado o nome do operador da transação, retornar todas as transferências relacionados à aquele operador.
+	// OBTER TODAS AS TRANSFERENCIAS PELO NOME DO OPERADOR.
+    @Operation(summary = "Retorna todas as transferências relacionadas a um operador específico")
 	@GetMapping("/operador")
-	public ResponseEntity<List<Transferencia>> getTransferenciasPorOperador(@Parameter(description = "Nome do operador", example = "João") @RequestParam String nomeOperador) {
+	public ResponseEntity<List<Transferencia>> getTransferenciasPorOperador(
+			@Parameter(description = "Nome do operador", example = "João") 
+			@RequestParam String nomeOperador) {
 		List<Transferencia> transferencias = transferenciaService.getTransferenciasPorOperador(nomeOperador);
 
 		return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
-	// Retorna todas as transferências com base no período de tempo e operador
-	// especificados
-	@Operation(summary = "Retorna todas as transferências com base no período de tempo e operador especificados")
+	// Retorna todas as transferências com base no período de tempo e operador especificados
+	// 5. Caso todos os filtros sejam informados, retornar todas as transferências com base no período de tempo informado e o nome do operador.
+    // OBTER TRANSFERENCIAS APENAS COM UMA DATA INICIAL E NOME DO OPERADOR
+    @Operation(summary = "Retorna todas as transferências com base no período de tempo e operador especificados")
 	@GetMapping("/periodo-operador")
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodoEOperador(
-			@Parameter(description = "Data de início do período", example = "2022-01-01T00:00:00") @RequestParam LocalDateTime dataInicio,
-//			@Parameter(description = "Data de fim do período", example = "2022-01-31T23:59:59") @RequestParam LocalDateTime dataFim,
-			@Parameter(description = "Nome do operador", example = "João") @RequestParam String nomeOperador) {
-		List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodoEOperador(dataInicio, nomeOperador);
+			 @Parameter(description = "Data de início do período", example = "dd/MM/yyyy") 
+		     @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
+		     @Parameter(description = "Nome do operador", example = "Patrick") 
+			 @RequestParam String nomeOperador) {
+    	  LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
+    	    LocalDateTime dataFimCompleta = dataInicio.atTime(23, 59, 59);
+    	    
+		List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodoEOperador(dataInicioCompleta, nomeOperador);
 
 		return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
 	// Retorna resultados paginados das transferências
+    // Obter todas as transferencias com limite por pagina.
 	@Operation(summary = "Retorna resultados paginados das transferências")
 	@GetMapping("/paginadas")
 	public ResponseEntity<Page<Transferencia>> getTransferenciasPaginadas(
@@ -102,6 +123,7 @@ public class TransferenciaController {
 	}
 	
 	// Cria uma nova transferência
+	// TODO: METODO QUEBRADO.
 	@Operation(summary = "Cria uma nova transferência")
 	@PostMapping()
 	public ResponseEntity<Transferencia> criarTransferencia(@RequestBody Transferencia transferencia) {
@@ -109,8 +131,9 @@ public class TransferenciaController {
 
 		return (novaTransferencia != null) ? ResponseEntity.status(HttpStatus.CREATED).body(novaTransferencia) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
-	
+		
 	// Atualiza uma transferência existente
+	// TODO: VERIFICAR
 	@Operation(summary = "Atualiza uma transferência existente")
 	@PostMapping("/{id}")
 	public ResponseEntity<Transferencia> atualizarTransferencia(
@@ -120,4 +143,57 @@ public class TransferenciaController {
 
 		return (transferenciaAtualizada != null) ? ResponseEntity.ok(transferenciaAtualizada) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
+	
+	// TODO: TA REGISTRANDO NAS TRANSFERENCIAS MAS NAO ESTÁ SALVANDO O SAQUE NEGATIVO NEM IDENTIFICANDO A OPERACAO AUTOMATICAMENTE.
+	@PostMapping("/{origem}/transferir/{destino}")
+	public ResponseEntity<Void> transferir(
+	        @PathVariable("origem") Long idContaOrigem,
+	        @PathVariable("destino") Long idContaDestino,
+	        @RequestParam double valor,
+	        @RequestParam br.com.banco.enums.Operation tipo) {
+	    contaService.transferir(idContaOrigem, idContaDestino, valor, tipo);
+	    return ResponseEntity.ok().build();
+	}
+	
+	// Pegar todas as transacoes em um periodo pelo nome.
+	@GetMapping("/transacoes")
+	public ResponseEntity<List<Transferencia>> buscarTransacoesPorPeriodoENome(
+	        @RequestParam String nome,
+	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
+	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim) {
+	    LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
+	    LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
+	    List<Transferencia> transacoes = contaService.buscarTransacoesPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
+	    return ResponseEntity.ok(transacoes);
+	}
+
+	// Obter Saldo Total por Nome
+	@GetMapping("/saldo-total")
+	public ResponseEntity<Double> calcularSaldoTotalPorNome(@RequestParam String nome) {
+		double saldoTotal = contaService.calcularSaldoTotalPorNome(nome);
+		return ResponseEntity.ok(saldoTotal);
+	}
+
+	// Obter o Saldo Total durante o periodo indicado.
+	@GetMapping("/saldo-periodo")
+	public ResponseEntity<Double> calcularSaldoPeriodoPorNome(
+	        @RequestParam String nome,
+	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
+	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim) {
+
+	    LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
+	    LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
+
+	    double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nome);
+	    return ResponseEntity.ok(saldoPeriodo);
+	}
+
+	// Sacar e salvar nas transacoes.
+    @PostMapping("/{id}/saque")
+    public ResponseEntity<Void> sacar(
+    		@PathVariable("id") Long idConta, 
+    		@RequestParam double valor) {
+        contaService.sacar(idConta, valor);
+        return ResponseEntity.ok().build();
+    }
 }
