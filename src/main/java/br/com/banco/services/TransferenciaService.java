@@ -22,7 +22,7 @@ public interface TransferenciaService {
 
 	List<Transferencia> getTransferenciasPorOperador(String nomeOperador);
 
-	List<Transferencia> getTransferenciasPorPeriodoEOperador(LocalDateTime dataInicio, String nomeOperador);
+	List<Transferencia> getTransferenciasPorPeriodoEOperador(LocalDateTime dataInicio, LocalDateTime dataFim, String nomeOperador);
 	
 	Page<Transferencia> getTransferenciasPaginadas(Pageable pageable);
 

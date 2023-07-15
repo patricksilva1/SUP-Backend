@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "TRANSFERS", description = "Endpoints Management.")
+@Tag(name = "TRANSFERENCIAS", description = "Endpoints Management.")
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("api/v1/transfers")
@@ -40,7 +40,11 @@ public class TransferenciaController {
 
 	// Retorna todas as transferências relacionadas a um número de conta específico
 	// 1. A sua api deve fornecer os dados de transferência de acordo com o número da conta bacária.
-	// TODO: VERIFICAR OQUE ESSE METODO TA FAZENDO.
+	/**
+	 * 
+	 * @param numeroConta
+	 * @return
+	 */
 	@Operation(summary = "Retorna todas as transferências relacionadas a um número de conta específico")
 	@GetMapping("/conta/{numeroConta}")
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorConta(
@@ -54,6 +58,10 @@ public class TransferenciaController {
 	// Retorna todas as transferências sem nenhum filtro
 	// 2. Caso não seja informado nenhum filtro, retornar todos os dados de transferência.
 	// Retornar todas as transferencias existentes.
+	/**
+	 * 
+	 * @return
+	 */
 	@Operation(summary = "Retorna todas as transferências sem nenhum filtro")
 	@GetMapping()
 	public ResponseEntity<List<Transferencia>> getAllTransferencias() {
@@ -62,25 +70,36 @@ public class TransferenciaController {
 		return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
-
 	// Retorna todas as transferências dentro de um período de tempo especificado
 	// 3. Caso seja informado um período de tempo, retornar todas as transferências relacionadas à aquele período de tempo.
-    @Operation(summary = "Retorna todas as transferências dentro de um período de tempo especificado")
-    @GetMapping("/periodo")
-    // TODO: ERROR DE CONVERSAO DE DATA
-    public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
-//    		@Parameter(description = "Data de início do período", example = "01/01/2017")
-    		@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDateTime dataInicio,
-//            @Parameter(description = "Data de fim do período", example = "08/09/2023") 
-    		@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDateTime dataFim) {
-        List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicio, dataFim);
-        
-        return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
+	/**
+	 * 
+	 * @param dataInicio
+	 * @param dataFim
+	 * @return
+	 */
+	@Operation(summary = "Retorna todas as transferências dentro de um período de tempo especificado")
+	@GetMapping("/periodo")
+	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
+	    @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
+	    @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim) {
+
+		 LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
+		 LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
+	    
+	    List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
+	    
+	    return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
 
 	// Retorna todas as transferências relacionadas a um operador específico
     // 4. Caso seja informado o nome do operador da transação, retornar todas as transferências relacionados à aquele operador.
-	// OBTER TODAS AS TRANSFERENCIAS PELO NOME DO OPERADOR.
+	// OBTER TODAS AS TRANSFERENCIAS PELO NOME DO OPERADOR NAS TRANSFERENCIAS.
+	/**
+	 * 
+	 * @param nomeOperador
+	 * @return
+	 */
     @Operation(summary = "Retorna todas as transferências relacionadas a um operador específico")
 	@GetMapping("/operador")
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorOperador(
@@ -94,20 +113,28 @@ public class TransferenciaController {
 	// Retorna todas as transferências com base no período de tempo e operador especificados
 	// 5. Caso todos os filtros sejam informados, retornar todas as transferências com base no período de tempo informado e o nome do operador.
     // OBTER TRANSFERENCIAS APENAS COM UMA DATA INICIAL E NOME DO OPERADOR
+    /**
+     * 
+     * @param dataInicio
+     * @param dataFim
+     * @param nomeOperador
+     * @return
+     */
     @Operation(summary = "Retorna todas as transferências com base no período de tempo e operador especificados")
-	@GetMapping("/periodo-operador")
-	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodoEOperador(
-			 @Parameter(description = "Data de início do período", example = "dd/MM/yyyy") 
-		     @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
-		     @Parameter(description = "Nome do operador", example = "Patrick") 
-			 @RequestParam String nomeOperador) {
-    	  LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
-    	    LocalDateTime dataFimCompleta = dataInicio.atTime(23, 59, 59);
-    	    
-		List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodoEOperador(dataInicioCompleta, nomeOperador);
+    @GetMapping("/periodo-operador")
+    public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodoEOperador(
+            @Parameter(description = "Data de início do período", example = "dd/MM/yyyy")
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim,
+            @Parameter(description = "Nome do operador", example = "Patrick")
+            @RequestParam String nomeOperador) {
+        LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
+        LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
 
-		return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-	}
+        List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodoEOperador(dataInicioCompleta, dataFimCompleta, nomeOperador);
+
+        return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 
 	// Retorna resultados paginados das transferências
     // Obter todas as transferencias com limite por pagina.

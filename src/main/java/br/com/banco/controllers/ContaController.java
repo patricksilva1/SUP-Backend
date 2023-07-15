@@ -21,7 +21,7 @@ import br.com.banco.enums.Operation;
 import br.com.banco.services.ContaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "ACCOUNTS", description = "Endpoints Management.")
+@Tag(name = "CONTAS", description = "Endpoints Management.")
 @CrossOrigin(origins = "*", maxAge = 3600)
 
 @RestController

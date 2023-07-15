@@ -29,11 +29,15 @@ public class TransferenciaServiceImpl implements TransferenciaService {
         return transferenciaRepository.findAll();
     }
 
+//    @Override
+//    public List<Transferencia> getTransferenciasPorConta(Long id) {
+//        return transferenciaRepository.findById(id)
+//                .map(Collections::singletonList)
+//                .orElse(Collections.emptyList());
+//    }
     @Override
-    public List<Transferencia> getTransferenciasPorConta(Long id) {
-        return transferenciaRepository.findById(id)
-                .map(Collections::singletonList)
-                .orElse(Collections.emptyList());
+    public List<Transferencia> getTransferenciasPorConta(Long numeroConta) {
+        return transferenciaRepository.findByContaNumeroConta(numeroConta);
     }
 
     @Override
@@ -47,8 +51,8 @@ public class TransferenciaServiceImpl implements TransferenciaService {
     }
     
     @Override
-    public List<Transferencia> getTransferenciasPorPeriodoEOperador(LocalDateTime dataInicio, String nomeOperador) {
-        return transferenciaRepository.findByDataInicioAndNomeOperador(dataInicio, nomeOperador);
+    public List<Transferencia> getTransferenciasPorPeriodoEOperador(LocalDateTime dataInicio, LocalDateTime dataFim, String nomeOperador) {
+        return transferenciaRepository.findByDataInicioAndDataFimAndNomeOperador(dataInicio, dataFim, nomeOperador);
     }
 
     @Override

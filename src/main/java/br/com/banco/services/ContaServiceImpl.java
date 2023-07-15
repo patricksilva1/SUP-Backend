@@ -1,5 +1,6 @@
 package br.com.banco.services;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -165,6 +166,12 @@ public class ContaServiceImpl implements ContaService {
                     break;
             }
         }
+        
+     // Formatar o valor com duas casas decimais
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
+        saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
+
 
         return saldoPeriodo;
     }   
