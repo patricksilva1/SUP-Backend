@@ -3,6 +3,7 @@ package br.com.banco.services;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +13,13 @@ import br.com.banco.entities.Transferencia;
 import br.com.banco.enums.Operation;
 import br.com.banco.repositories.ContaRepository;
 import br.com.banco.repositories.TransferenciaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
 public class ContaServiceImpl implements ContaService {
+	private static final Logger logger = LoggerFactory.getLogger(ContaServiceImpl.class);
 
 	private final ContaRepository contaRepository;
 
@@ -137,11 +141,26 @@ public class ContaServiceImpl implements ContaService {
         return transferenciaRepository.buscarPorPeriodoENome(dataInicio, dataFim, nome);
     }
 
-    @Override
-    public double calcularSaldoTotalPorNome(String nome) {
-        Conta conta = contaRepository.findByNome(nome);
-        return conta.getSaldo();
-    }
+	@Override
+	public double calcularSaldoTotalPorNome(String nome) {
+		if (nome == null) {
+			throw new IllegalArgumentException("Esse nome não foi encontrado.");
+		}
+		try {
+			Optional<Conta> optionalConta = contaRepository.findByNome(nome);
+
+			if (optionalConta.isEmpty()) {
+				throw new IllegalArgumentException("Essa conta não foi encontrada.");
+			}
+			
+			Conta conta = optionalConta.get();
+			return conta.getSaldo();
+		} catch (Exception e) {
+			logger.error("Ocorreu uma exceção durante o cálculo do saldo: {}", " '" + e.getMessage() + " '");
+
+			return 0.0;
+		}
+	}
 
     @Override
     public double calcularSaldoPeriodoPorNome(LocalDateTime dataInicio, LocalDateTime dataFim, String nome) {
