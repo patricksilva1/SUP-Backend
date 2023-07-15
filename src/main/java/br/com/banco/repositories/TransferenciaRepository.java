@@ -14,12 +14,6 @@ import br.com.banco.entities.Transferencia;
 
 public interface TransferenciaRepository extends JpaRepository<Transferencia, Long>, JpaSpecificationExecutor<Transferencia> {
 
-	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.nomeOperadorTransacao = :nomeOperador")
-	List<Transferencia> findByDataInicioAndNomeOperador(@Param("dataInicio") LocalDateTime dataInicio, @Param("nomeOperador") String nomeOperador);
-
-	@Query("SELECT t FROM Transferencia t WHERE t.conta.id = :numeroConta")
-	List<Transferencia> findByContaNumeroConta(Long numeroConta);
-
 	List<Transferencia> findByDataTransferenciaBetween(LocalDateTime dataInicio, LocalDateTime dataFim);
 
 	List<Transferencia> findByNomeOperadorTransacao(String nomeOperador);
@@ -27,10 +21,13 @@ public interface TransferenciaRepository extends JpaRepository<Transferencia, Lo
 	List<Transferencia> findByContaId(Long contaId);
 
 	Page<Transferencia> findAll(Pageable pageable);
+
+	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.nomeOperadorTransacao LIKE %:nomeOperador%")
+	List<Transferencia> findByDataInicioAndDataFimAndNomeOperador(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("nomeOperador") String nomeOperador);
 	
-	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.conta.nome = :nome")
-	List<Transferencia> buscarPorPeriodoENome(
-			@Param("dataInicio") LocalDateTime dataInicio,
-			@Param("dataFim") LocalDateTime dataFim, 
-			@Param("nome") String nome);
+	@Query("SELECT t FROM Transferencia t WHERE t.conta.id = :numeroConta")
+	List<Transferencia> findByContaNumeroConta(Long numeroConta);
+
+	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.conta.nome LIKE %:nome%")
+	List<Transferencia> buscarPorPeriodoENome(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("nome") String nome);
 }
