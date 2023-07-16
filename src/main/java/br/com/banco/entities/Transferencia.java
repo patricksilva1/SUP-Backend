@@ -1,6 +1,5 @@
 package br.com.banco.entities;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
@@ -28,8 +27,6 @@ public class Transferencia {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-//	@Column(name = "data_transferencia")
-//	private LocalDateTime dataTransferencia;
 	@Column(name = "data_transferencia", columnDefinition = "TIMESTAMP WITH TIME ZONE")
 	private ZonedDateTime dataTransferencia;
 
@@ -42,11 +39,10 @@ public class Transferencia {
 	private Operation tipo;
 
 	// TODO: Verificar se a prova vai mesmo autorizar o nome do operador ser nulo.
-
 	@Column(name = "nome_operador_transacao")
 	private String nomeOperadorTransacao;
 
-	@Column(name = "saldoAtual")
+	@Transient
 	private Double saldoAtual;
 
 	@ManyToOne
@@ -78,18 +74,11 @@ public class Transferencia {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
-//	public LocalDateTime getDataTransferencia() {
-//		return dataTransferencia;
-//	}
 
 	public ZonedDateTime getDataTransferencia() {
 		return dataTransferencia;
 	}
 
-//	public void setDataTransferencia(LocalDateTime dataTransferencia) {
-//		this.dataTransferencia = dataTransferencia;
-//	}
 	public void setDataTransferencia(ZonedDateTime dataTransferencia) {
 		this.dataTransferencia = dataTransferencia;
 	}

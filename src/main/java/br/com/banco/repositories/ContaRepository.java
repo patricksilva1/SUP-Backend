@@ -20,4 +20,8 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
 	
     @Query("SELECT SUM(c.saldo) FROM Conta c WHERE LOWER(c.nome) LIKE LOWER(CONCAT('%', :nome, '%')) AND c.dataDeCriacao < :dataInicio")
     Double findByNomeIgnoreCaseLike(@Param("nome") String nome, @Param("dataInicio") ZonedDateTime dataInicio);
+
+    @Query("SELECT SUM(c.saldo) FROM Conta c WHERE LOWER(c.nome) LIKE LOWER(CONCAT('%', :nome, '%')) AND c.dataDeCriacao >= :dataInicio AND c.dataDeCriacao <= :dataFim")
+    Double findByNomeIgnoreCaseLikeAndDataDeCriacaoBetween(@Param("nome") String nome, @Param("dataInicio") ZonedDateTime dataInicio, @Param("dataFim") ZonedDateTime dataFim);
+
 }
