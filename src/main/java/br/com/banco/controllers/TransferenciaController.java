@@ -38,7 +38,6 @@ import br.com.banco.services.ContaService;
 import br.com.banco.services.TransferenciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,8 +59,7 @@ public class TransferenciaController {
 
 	private static final Logger logger = LoggerFactory.getLogger(TransferenciaController.class);
 
-	// Retorna todas as transferências relacionadas a um número de conta específico
-	// 1. A sua api deve fornecer os dados de transferência de acordo com o número da conta bacária.
+	// "1. A sua api deve fornecer os dados de transferência de acordo com o número da conta bacária."
 	/**
 	 * Retrieves all transfers related to a specific account number.
 	 * 
@@ -70,7 +68,7 @@ public class TransferenciaController {
 	 *         transfers are found, returns an empty response with HTTP status 204
 	 *         (No Content).
 	 */
-	@Operation(summary = "Retorna todas as transferências relacionadas a um número de conta específico")
+	@Operation(summary = "Retorna todas as transferências relacionadas a um número de conta específico.", description = "Retornar todas as transferências relacionadas a um número de conta específico.")
 	@GetMapping("/conta/{numeroConta}")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Transfers found"), @ApiResponse(responseCode = "204", description = "No transfers found") })
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorConta(
@@ -85,8 +83,7 @@ public class TransferenciaController {
 		return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 	
-	// Retorna todas as transferências sem nenhum filtro
-	// 2. Caso não seja informado nenhum filtro, retornar todos os dados de transferência.
+	// "2. Caso não seja informado nenhum filtro, retornar todos os dados de transferência."
 	// Retornar todas as transferencias existentes.
 	/**
 	 * Retrieves all transfers without any filters.
@@ -94,7 +91,7 @@ public class TransferenciaController {
 	 * @return ResponseEntity containing the list of Transferencia or an empty response if there are no transfers.
 	 *         In case of an error, returns an error response with HTTP status 500 (Internal Server Error).
 	 */
-	@Operation(summary = "Retorna todas as transferências sem nenhum filtro")
+	@Operation(summary = "Retorna todas as transferências sem nenhum filtro.", description = "Retornar todas as transferências sem um filtro especifico.")
 	@GetMapping()
 	public ResponseEntity<List<Transferencia>> getAllTransferencias() {
 		try {
@@ -106,8 +103,7 @@ public class TransferenciaController {
 		}
 	}
 
-	// Retorna todas as transferências dentro de um período de tempo especificado
-	// 3. Caso seja informado um período de tempo, retornar todas as transferências relacionadas à aquele período de tempo.
+	// "3. Caso seja informado um período de tempo, retornar todas as transferências relacionadas à aquele período de tempo."
 	// Big O(n)
 	/**
 	 * Retrieves all transfers within a specified time period.
@@ -118,43 +114,7 @@ public class TransferenciaController {
 	 *         In case of a bad request, returns ResponseEntity with BadRequest status.
 	 *         In case of internal server error, returns ResponseEntity with Internal Server Error status (HttpStatus.INTERNAL_SERVER_ERROR).
 	 */
-	@Operation(summary = "Retorna todas as transferências dentro de um período de tempo especificado")
-//	@GetMapping("/periodo")
-//	@ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Successfully retrieved transfers"),
-//            @ApiResponse(responseCode = "204", description = "No transfers found in the specified period"),
-//            @ApiResponse(responseCode = "400", description = "Bad request"),
-//            @ApiResponse(responseCode = "500", description = "Internal server error")})
-//	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
-//	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
-//	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
-//		// Verifica se as datas fornecidas pelo usuário são inválidas
-//	    if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
-//	        logger.error("Error: Data inválida fornecida pelo usuário");
-//	        return ResponseEntity.badRequest().build();
-//	    }
-//	    try {
-//	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//	        ZonedDateTime dataInicioCompleta = LocalDate.parse(dataInicio, formatter).atStartOfDay(ZoneId.systemDefault());
-//	        ZonedDateTime dataFimCompleta = LocalDate.parse(dataFim, formatter).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
-//
-//			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-//				// Retorna uma resposta de requisição inválida se a data de início for posterior à data de término
-//				logger.error("A Data Inicial é Posterior a Data Fim");
-//	            return ResponseEntity.badRequest().build();
-//			}
-//			List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
-//
-//			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-//		} catch (DateTimeParseException e) {
-//			// Retorna uma resposta de requisição inválida se o formato da data for inválido
-//			logger.error("Error: Data inválida fornecida pelo usuário", e);
-//			return ResponseEntity.badRequest().build();
-//		} catch (Exception e) {
-//			logger.error("Error: Erro ao obter as transferências por período", e);
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//		}
-//	}
+	@Operation(summary = "Retorna todas as transferências dentro de um período de tempo especificado.", description = "Retornar todas as transferências dentro de um período de tempo especificado.")
 	@GetMapping("/periodo")
 	@ApiResponses(value = {
 	        @ApiResponse(responseCode = "200", description = "Successfully retrieved transfers"),
@@ -164,10 +124,9 @@ public class TransferenciaController {
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
 	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
 	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
-
 	    try {
 	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	        LocalDate parsedDataInicio = LocalDate.parse(dataInicio, inputFormatter);
 	        LocalDate parsedDataFim = LocalDate.parse(dataFim, inputFormatter);
@@ -177,21 +136,17 @@ public class TransferenciaController {
 
 	        List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
 
-	        return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-	    } catch (DateTimeParseException e) {
-	        // Retorna uma resposta de requisição inválida se o formato da data for inválido
-	        logger.error("Error: Data inválida fornecida pelo usuário", e);
-	        return ResponseEntity.badRequest().build();
-	    } catch (Exception e) {
-	        logger.error("Error: Erro ao obter as transferências por período", e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	    }
+			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+		} catch (DateTimeParseException e) {
+			logger.error("Error: Data inválida fornecida pelo usuário", e);
+			return ResponseEntity.badRequest().build();
+		} catch (Exception e) {
+			logger.error("Error: Erro ao obter as transferências por período", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
 	}
 
-
-	// Retorna todas as transferências relacionadas a um operador específico
-    // 4. Caso seja informado o nome do operador da transação, retornar todas as transferências relacionados à aquele operador.
-	// OBTER TODAS AS TRANSFERENCIAS PELO NOME DO OPERADOR NAS TRANSFERENCIAS.
+    // "4. Caso seja informado o nome do operador da transação, retornar todas as transferências relacionados à aquele operador."
 	/**
 	 * Retrieves all transfers related to a specific operator.
 	 *
@@ -199,10 +154,9 @@ public class TransferenciaController {
 	 * @return A ResponseEntity containing a list of Transferencia objects if transfers are found,
 	 *         or an appropriate error response if the name is null or empty or if no transfers are found.
 	 */
-	@Operation(summary = "Retorna todas as transferências relacionadas a um operador específico")
+	@Operation(summary = "Retorna todas as transferências relacionadas a um operador específico.", description = "Retornar todas as transferências relacionadas a um operador específico.")
 	@GetMapping("/operador")
-	public ResponseEntity<List<Transferencia>> getTransferenciasPorOperador(
-			@Parameter(description = "Nome do operador", example = "Patrick") @RequestParam String nomeOperador) {
+	public ResponseEntity<List<Transferencia>> getTransferenciasPorOperador(@Parameter(description = "Nome do operador", example = "Patrick") @RequestParam String nomeOperador) {
 		try {
 			if (nomeOperador == null || nomeOperador.isEmpty()) {
 				return ResponseEntity.badRequest().build();
@@ -211,7 +165,6 @@ public class TransferenciaController {
 			if (nome.isEmpty()) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 			}
-	        
 			Optional<List<Transferencia>> transferencias = Optional.ofNullable(transferenciaService.getTransferenciasPorOperador(nomeOperador));
 
 			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -222,9 +175,7 @@ public class TransferenciaController {
 		}
 	}
 
-	// Retorna todas as transferências com base no período de tempo e operador especificados
-	// 5. Caso todos os filtros sejam informados, retornar todas as transferências com base no período de tempo informado e o nome do operador.
-    // OBTER TRANSFERENCIAS APENAS COM UMA DATA INICIAL E NOME DO OPERADOR
+	// "5. Caso todos os filtros sejam informados, retornar todas as transferências com base no período de tempo informado e o nome do operador."
 	// Big O(n)
 	/**
 	 * Retrieves all transfers based on the specified time period and operator.
@@ -236,14 +187,14 @@ public class TransferenciaController {
 	 *         or a ResponseEntity with HTTP status NO_CONTENT if no transfers are found.
 	 * @throws TransferenciaException if an error occurs while retrieving the transfers.
 	 */
-    @Operation(summary = "Retorna todas as transferências com base no período de tempo e operador especificados")
+    @Operation(summary = "Retorna todas as transferências com base no período de tempo e operador especificados.", description = "Retornar todas as transferências com base no período de tempo e operador especificados")
     @GetMapping("/periodo-operador")
     public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodoEOperador(
             @Parameter(description = "Data de início do período", example = "dd/MM/yyyy")
             @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
             @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim,
             @Parameter(description = "Nome do operador", example = "Patrick") @RequestParam String nomeOperador) {
-    	// Verifica se as datas fornecidas pelo usuário são inválidas
+    	
 	    if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
 	        logger.error("Error: Data inválida fornecida pelo usuário");
 	        return ResponseEntity.badRequest().build();
@@ -262,7 +213,6 @@ public class TransferenciaController {
         }
     }
 
-	// Retorna resultados paginados das transferências
 	// Obter todas as transferencias com limite por pagina.
 	// Big O(n)
     /**
@@ -274,7 +224,7 @@ public class TransferenciaController {
      *         or a ResponseEntity with HTTP status NO_CONTENT if no transfers are found.
      * @throws IllegalArgumentException if the page number or page size is invalid.
      */
-	@Operation(summary = "Retorna resultados paginados das transferências")
+	@Operation(summary = "Retorna resultados paginados das transferências.", description = "Retornar resultados paginados das transferências.")
 	@GetMapping("/paginadas")
 	public ResponseEntity<Page<Transferencia>> getTransferenciasPaginadas(
             @Parameter(description = "O número da página", example = "0") @RequestParam int pagina,
@@ -310,6 +260,7 @@ public class TransferenciaController {
 	 * @throws DataInvalidaException  if the start date is after the end date.
 	 * @throws TransferenciaException if an error occurs while retrieving the transactions.
 	 */
+	@Operation(summary = "Retorna resultados das transferências por Periodo e se a Conta existe no banco.", description = "Retornar resultados das transferências por Periodo e se a Conta existe no banco.")
 	@GetMapping("/transacoes")
 	public ResponseEntity<List<Transferencia>> getTransacoesPorPeriodoENomeESeContaExiste(@RequestParam String nome,
 			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
@@ -328,13 +279,9 @@ public class TransferenciaController {
 				throw new NomeVazioException("Exception: O nome não pode estar vazio");
 			}
 			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				// Retorna uma resposta de requisição inválida se a data de início for posterior à data de término
 				logger.error("A Data Inicial é Posterior a Data Fim");
 	            return ResponseEntity.badRequest().build();
 			}
-//			if (dataInicio.isAfter(dataFim)) {
-//				throw new DataInvalidaException("Exception: A data de início não pode ser posterior à data de fim");
-//			}
 			List<Transferencia> transacoes = contaService.buscarTransacoesPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
 			
 			return (transacoes != null && !transacoes.isEmpty()) ? ResponseEntity.ok(transacoes) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -366,6 +313,7 @@ public class TransferenciaController {
 	 *         - If the name is valid but no balance is found, it returns a Not Found response.
 	 *         - If any exception occurs during the calculation, it returns an Internal Server Error response.
 	 */
+	@Operation(summary = "Retorna o saldo total por Nome registrado no Banco.", description = "Retornar o saldo total por Nome registrado no Banco.")
 	@GetMapping("/saldo-total")
 	public ResponseEntity<Double> calcularSaldoTotalPorNome(@RequestParam String nome) {
 		try {
@@ -402,6 +350,7 @@ public class TransferenciaController {
 	 *         appropriate status if there are validation errors or an error occurs
 	 *         during the calculation.
 	 */
+	@Operation(summary = "Retorna o saldo total no periodo especificado por Nome, data de início e data de fim registrado no Banco.", description = "Retornar o saldo total no periodo especificado por Nome, data de início e data de fim registrado no Banco.")
 	@GetMapping("/saldo-periodo")
 	public ResponseEntity<Double> calcularSaldoPeriodoPorNome(@RequestParam String nome,
 			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
@@ -421,11 +370,9 @@ public class TransferenciaController {
 				return ResponseEntity.badRequest().build();
 			}
 			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				// Retorna uma resposta de requisição inválida se a data de início for posterior à data de término
 				logger.error("A Data Inicial é Posterior a Data Fim");
 	            return ResponseEntity.badRequest().build();
 			}
-
 			Double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nome);
 
 			return (saldoPeriodo != null) ? ResponseEntity.ok(saldoPeriodo) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -453,6 +400,7 @@ public class TransferenciaController {
 	 *         (Not Found). - If an error occurs during the withdrawal operation, it
 	 *         returns a response with HTTP status 500 (Internal Server Error).
 	 */
+	@Operation(summary = "Realiza o Saque por Id do Usuário.", description = "Realizar o Saque por Id do Usuário.")
 	@PostMapping("/{id}/saque")
 	public ResponseEntity<Void> sacar(@PathVariable("id") Long idConta, @RequestParam double valor) {
 		try {
@@ -478,38 +426,5 @@ public class TransferenciaController {
 			logger.error("Erro interno ao sacar. Conta: {}, Valor: R${}", idConta, valor, e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
-	}
-
-	// Cria uma nova transferência
-	// TODO: METODO QUEBRADO.
-	@Operation(summary = "Cria uma nova transferência")
-	@PostMapping()
-	public ResponseEntity<Transferencia> criarTransferencia(@RequestBody Transferencia transferencia) {
-		Transferencia novaTransferencia = transferenciaService.criarTransferencia(transferencia);
-
-		return (novaTransferencia != null) ? ResponseEntity.status(HttpStatus.CREATED).body(novaTransferencia) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	}
-		
-	// Atualiza uma transferência existente
-	// TODO: VERIFICAR
-	@Operation(summary = "Atualiza uma transferência existente")
-	@PostMapping("/{id}")
-	public ResponseEntity<Transferencia> atualizarTransferencia(
-			@Parameter(description = "ID da transferência", example = "1") @PathVariable Long id,
-			@RequestBody Transferencia transferencia) {
-		Transferencia transferenciaAtualizada = transferenciaService.atualizarTransferencia(id, transferencia);
-
-		return (transferenciaAtualizada != null) ? ResponseEntity.ok(transferenciaAtualizada) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	}
-	
-	// TODO: TA REGISTRANDO NAS TRANSFERENCIAS MAS NAO ESTÁ SALVANDO O SAQUE NEGATIVO NEM IDENTIFICANDO A OPERACAO AUTOMATICAMENTE.
-	@PostMapping("/{origem}/transferir/{destino}")
-	public ResponseEntity<Void> transferir(
-	        @PathVariable("origem") Long idContaOrigem,
-	        @PathVariable("destino") Long idContaDestino,
-	        @RequestParam double valor,
-	        @RequestParam br.com.banco.enums.Operation tipo) {
-	    contaService.transferir(idContaOrigem, idContaDestino, valor, tipo);
-	    return ResponseEntity.ok().build();
 	}
 }
