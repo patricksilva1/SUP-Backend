@@ -14,19 +14,20 @@ import br.com.banco.entities.Transferencia;
 
 public interface TransferenciaRepository extends JpaRepository<Transferencia, Long>, JpaSpecificationExecutor<Transferencia> {
 
-	List<Transferencia> findByDataTransferenciaBetween(LocalDateTime dataInicio, LocalDateTime dataFim);
-
-	List<Transferencia> findByNomeOperadorTransacao(String nomeOperador);
-
+	Page<Transferencia> findAll(Pageable pageable);
+	
 	List<Transferencia> findByContaId(Long contaId);
 
-	Page<Transferencia> findAll(Pageable pageable);
+	List<Transferencia> findByDataTransferenciaBetween(LocalDateTime dataInicio, LocalDateTime dataFim);
+
+	@Query("SELECT t FROM Transferencia t WHERE t.conta.id = :numeroConta")
+	List<Transferencia> findByContaNumeroConta(Long numeroConta);
+	
+	@Query("SELECT t FROM Transferencia t WHERE LOWER(t.nomeOperadorTransacao) LIKE %:nomeOperador%")
+	List<Transferencia> findByNomeOperadorTransacao(@Param("nomeOperador") String nomeOperador);
 
 	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.nomeOperadorTransacao LIKE %:nomeOperador%")
 	List<Transferencia> findByDataInicioAndDataFimAndNomeOperador(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("nomeOperador") String nomeOperador);
-	
-	@Query("SELECT t FROM Transferencia t WHERE t.conta.id = :numeroConta")
-	List<Transferencia> findByContaNumeroConta(Long numeroConta);
 
 	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.conta.nome LIKE %:nome%")
 	List<Transferencia> buscarPorPeriodoENome(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("nome") String nome);

@@ -18,13 +18,13 @@ public interface TransferenciaService {
 
 	List<Transferencia> getTransferenciasPorConta(Long numeroConta);
 
+	Page<Transferencia> getTransferenciasPaginadas(Pageable pageable);
+
 	List<Transferencia> getTransferenciasPorPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim);
 
 	List<Transferencia> getTransferenciasPorOperador(String nomeOperador);
 
 	List<Transferencia> getTransferenciasPorPeriodoEOperador(LocalDateTime dataInicio, LocalDateTime dataFim, String nomeOperador);
-	
-	Page<Transferencia> getTransferenciasPaginadas(Pageable pageable);
 
 	Transferencia criarTransferencia(Transferencia transferencia);
 
