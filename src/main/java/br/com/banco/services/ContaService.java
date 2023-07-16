@@ -3,8 +3,6 @@ package br.com.banco.services;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 import br.com.banco.entities.Conta;
 import br.com.banco.entities.Transferencia;
 import br.com.banco.enums.Operation;
@@ -23,8 +21,10 @@ public interface ContaService {
 	public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
 
 	public double calcularSaldoTotalPorNome(String nome);
-	
+
 	public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
 
 	Conta obterContaPorNome(String nome);
+
+	public List<Transferencia> buscarTransacoesPorNome(String nome);
 }

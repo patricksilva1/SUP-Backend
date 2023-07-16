@@ -134,14 +134,16 @@ public class TransferenciaServiceImpl implements TransferenciaService {
                 break;
             case TRANSF_ENTRADA:
                 // Atualizar o saldo atual para transferência de entrada
-                saldoAtual += valor;
-                break;
-            case TRANSF_SAIDA:
-                // Atualizar o saldo atual para transferência de saída
-                saldoAtual -= valor;
-                break;
-        }
-        
+				saldoAtual += valor;
+				break;
+			case TRANSF_SAIDA:
+				// Atualizar o saldo atual para transferência de saída
+				saldoAtual -= valor;
+				break;
+			default:
+				break;
+			}
+
         // Arredonde o saldo atual para duas casas decimais
         saldoAtual = Math.round(saldoAtual * 100.0) / 100.0;
         

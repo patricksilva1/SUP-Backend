@@ -426,9 +426,9 @@ public class TransferenciaController {
 	            return ResponseEntity.badRequest().build();
 			}
 
-			double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nome);
+			Double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nome);
 
-			return (saldoPeriodo >= 0 || saldoPeriodo <= 0) ? ResponseEntity.ok(saldoPeriodo) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+			return (saldoPeriodo != null) ? ResponseEntity.ok(saldoPeriodo) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		} catch (IllegalArgumentException e) {
 			logger.error("Argumento inválido fornecido ao calcular o saldo do período para o nome: " + nome, e);
 			return ResponseEntity.badRequest().build();

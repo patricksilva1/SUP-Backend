@@ -146,16 +146,17 @@ public class ContaServiceImpl implements ContaService {
         }
     }
     
-//    @Override
-//    public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
-//        return transferenciaRepository.buscarPorPeriodoENome(dataInicio, dataFim, nome);
-//    }
     @Override
     public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
         ZonedDateTime dataInicioCompleta = dataInicio.toLocalDate().atStartOfDay(dataInicio.getZone());
         ZonedDateTime dataFimCompleta = dataFim.toLocalDate().atTime(LocalTime.MAX).atZone(dataFim.getZone());
 
         return transferenciaRepository.buscarPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
+    }
+    
+    @Override
+    public List<Transferencia> buscarTransacoesPorNome(String nome) {
+        return transferenciaRepository.buscarPorNome(nome);
     }
 
 
@@ -176,12 +177,12 @@ public class ContaServiceImpl implements ContaService {
             return 0.0;
         }
     }
-
-
+    
+    //TODO: FUNCIONANDO PERFEITAMENTE
 //    @Override
 //    public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
-//    	
-//    	List<Transferencia> transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
+//        List<Transferencia> transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
+//        
 //        double saldoPeriodo = 0.0;
 //
 //        for (Transferencia transferencia : transacoes) {
@@ -197,54 +198,63 @@ public class ContaServiceImpl implements ContaService {
 //                case TRANSF_SAIDA:
 //                    saldoPeriodo -= valorOperacao;
 //                    break;
+//                case TRANSFERENCIA:
+//                    saldoPeriodo += valorOperacao; // ou -= valorOperacao, dependendo do fluxo desejado
+//                    break;
 //                default:
 //                    // Lida com outros tipos de operações, se necessário
 //                    break;
 //            }
 //        }
-//     // Formatar o valor com duas casas decimais
+//
+//        // Formatar o valor com duas casas decimais
 //        DecimalFormat decimalFormat = new DecimalFormat("#.##");
 //        String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
 //        saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
 //
-//
 //        return saldoPeriodo;
-//    }   
-	@Override
-	public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
-	    List<Transferencia> transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
-	    
-	    // Obter o saldo atual da conta antes do período
-	    Double saldoInicial = contaRepository.findByNomeIgnoreCaseLike(nome, dataInicio);
-	    double saldoPeriodo = saldoInicial != null ? saldoInicial : 0.0;
+//    }
+    @Override
+    public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
+        List<Transferencia> transacoes;
+        
+        if (dataInicio == null && dataFim == null) {
+            transacoes = buscarTransacoesPorNome(nome);
+        } else {
+            transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
+        }
+        
+        double saldoPeriodo = 0.0;
 
-	    for (Transferencia transferencia : transacoes) {
-	        Operation tipoOperacao = transferencia.getTipo();
-	        double valorOperacao = transferencia.getValor();
+        for (Transferencia transferencia : transacoes) {
+            Operation tipoOperacao = transferencia.getTipo();
+            double valorOperacao = transferencia.getValor();
 
-	        switch (tipoOperacao) {
-	            case DEPOSITO:
-	            case TRANSF_ENTRADA:
-	                saldoPeriodo += valorOperacao;
-	                break;
-	            case SAQUE:
-	            case TRANSF_SAIDA:
-	                saldoPeriodo -= valorOperacao;
-	                break;
-	            default:
-	                // Lida com outros tipos de operações, se necessário
-	                break;
-	        }
-	    }
+            switch (tipoOperacao) {
+                case DEPOSITO:
+                case TRANSF_ENTRADA:
+                    saldoPeriodo += valorOperacao;
+                    break;
+                case SAQUE:
+                case TRANSF_SAIDA:
+                    saldoPeriodo -= valorOperacao;
+                    break;
+                case TRANSFERENCIA:
+                    saldoPeriodo += valorOperacao; // ou -= valorOperacao, dependendo do fluxo desejado
+                    break;
+                default:
+                    // Lida com outros tipos de operações, se necessário
+                    break;
+            }
+        }
 
-	    // Formatar o valor com duas casas decimais
-	    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-	    String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
-	    saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
+        // Formatar o valor com duas casas decimais
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
+        saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
 
-	    return saldoPeriodo;
-	}
-
+        return saldoPeriodo;
+    }
 
 	
 	
