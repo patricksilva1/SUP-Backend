@@ -1,7 +1,6 @@
 package br.com.banco.services;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,6 @@ public class TransferenciaServiceImpl implements TransferenciaService {
         return transferenciaRepository.findAll();
     }
 
-//    @Override
-//    public List<Transferencia> getTransferenciasPorConta(Long id) {
-//        return transferenciaRepository.findById(id)
-//                .map(Collections::singletonList)
-//                .orElse(Collections.emptyList());
-//    }
     @Override
     public List<Transferencia> getTransferenciasPorConta(Long numeroConta) {
         return transferenciaRepository.findByContaNumeroConta(numeroConta);
@@ -80,7 +73,13 @@ public class TransferenciaServiceImpl implements TransferenciaService {
         if (contaOrigem.getSaldo() < transferencia.getValor()) {
             throw new RuntimeException("Saldo insuficiente na conta de origem");
         }
-        transferencia.setNomeOperadorTransacao(contaDestino.getNome());
+        
+        // Defina o nome do operador de transação com base no tipo de operação da transferência
+        if (transferencia.getTipo() == Operation.TRANSF_SAIDA) {
+            transferencia.setNomeOperadorTransacao(contaDestino.getNome());
+        } else if (transferencia.getTipo() == Operation.TRANSF_ENTRADA) {
+            transferencia.setNomeOperadorTransacao(contaOrigem.getNome());
+        }
 
         // Realize a subtração do valor da conta de origem
         double novoSaldoOrigem = contaOrigem.getSaldo() - transferencia.getValor();

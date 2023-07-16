@@ -147,12 +147,10 @@ public class ContaServiceImpl implements ContaService {
 			throw new IllegalArgumentException("Esse nome não foi encontrado.");
 		}
 		try {
-			Optional<Conta> optionalConta = contaRepository.findByNome(nome);
-
+			Optional<Conta> optionalConta = contaRepository.findByNomeIgnoreCaseLike(nome);
 			if (optionalConta.isEmpty()) {
 				throw new IllegalArgumentException("Essa conta não foi encontrada.");
 			}
-			
 			Conta conta = optionalConta.get();
 			return conta.getSaldo();
 		} catch (Exception e) {
