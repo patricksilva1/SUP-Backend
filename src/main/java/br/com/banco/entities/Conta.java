@@ -1,19 +1,20 @@
 package br.com.banco.entities;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "conta")
@@ -29,8 +30,10 @@ public class Conta {
     @Column(name = "nome_responsavel")
     private String nome;
 
-    @Column(name = "data_de_criacao")
-    private LocalDateTime dataDeCriacao;
+//    @Column(name = "data_de_criacao")
+//    private LocalDateTime dataDeCriacao;
+    @Column(name = "data_de_criacao", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private ZonedDateTime dataDeCriacao;
 
     @Column(name = "saldo", nullable = false, columnDefinition = "DECIMAL(20,2)")
     private Double saldo;
@@ -38,10 +41,14 @@ public class Conta {
     @OneToMany(mappedBy = "conta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transferencia> transferencias = new ArrayList<>();
 
+    public void setDataCriacaoaAdjusted(ZonedDateTime dataDeCriacao) {
+        this.dataDeCriacao = dataDeCriacao;
+    }
+    
     // Construtores
 
     public Conta() {
-        this.dataDeCriacao = LocalDateTime.now();
+        this.dataDeCriacao = ZonedDateTime.now();
         this.saldo = 0.0;
     }
 
@@ -64,7 +71,7 @@ public class Conta {
         this.nome = nome;
     }
 
-    public LocalDateTime getDataDeCriacao() {
+    public ZonedDateTime getDataDeCriacao() {
         return dataDeCriacao;
     }
 

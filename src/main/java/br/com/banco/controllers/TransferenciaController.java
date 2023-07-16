@@ -1,7 +1,11 @@
 package br.com.banco.controllers;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -115,35 +119,75 @@ public class TransferenciaController {
 	 *         In case of internal server error, returns ResponseEntity with Internal Server Error status (HttpStatus.INTERNAL_SERVER_ERROR).
 	 */
 	@Operation(summary = "Retorna todas as transferências dentro de um período de tempo especificado")
+//	@GetMapping("/periodo")
+//	@ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successfully retrieved transfers"),
+//            @ApiResponse(responseCode = "204", description = "No transfers found in the specified period"),
+//            @ApiResponse(responseCode = "400", description = "Bad request"),
+//            @ApiResponse(responseCode = "500", description = "Internal server error")})
+//	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
+//	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
+//	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
+//		// Verifica se as datas fornecidas pelo usuário são inválidas
+//	    if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
+//	        logger.error("Error: Data inválida fornecida pelo usuário");
+//	        return ResponseEntity.badRequest().build();
+//	    }
+//	    try {
+//	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//	        ZonedDateTime dataInicioCompleta = LocalDate.parse(dataInicio, formatter).atStartOfDay(ZoneId.systemDefault());
+//	        ZonedDateTime dataFimCompleta = LocalDate.parse(dataFim, formatter).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+//
+//			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
+//				// Retorna uma resposta de requisição inválida se a data de início for posterior à data de término
+//				logger.error("A Data Inicial é Posterior a Data Fim");
+//	            return ResponseEntity.badRequest().build();
+//			}
+//			List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
+//
+//			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+//		} catch (DateTimeParseException e) {
+//			// Retorna uma resposta de requisição inválida se o formato da data for inválido
+//			logger.error("Error: Data inválida fornecida pelo usuário", e);
+//			return ResponseEntity.badRequest().build();
+//		} catch (Exception e) {
+//			logger.error("Error: Erro ao obter as transferências por período", e);
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//		}
+//	}
 	@GetMapping("/periodo")
 	@ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved transfers"),
-            @ApiResponse(responseCode = "204", description = "No transfers found in the specified period"),
-            @ApiResponse(responseCode = "400", description = "Bad request"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")})
+	        @ApiResponse(responseCode = "200", description = "Successfully retrieved transfers"),
+	        @ApiResponse(responseCode = "204", description = "No transfers found in the specified period"),
+	        @ApiResponse(responseCode = "400", description = "Bad request"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")})
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
-	    @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
-	    @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim) {
-		try {
-			LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
-			LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
-			
-			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				// Retorna uma resposta de requisição inválida se a data de início for posterior à data de término
-				logger.error("A Data Inicial é Posterior a Data Fim");
-	            return ResponseEntity.badRequest().build();
-			}
-			List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
+	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
+	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
 
-			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-		} catch (IllegalArgumentException e) {
-			// Retorna uma resposta de requisição inválida se o formato da data for inválido
-			return ResponseEntity.badRequest().build();
-		} catch (Exception e) {
-			logger.error("Erro ao obter as transferências por período", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+	    try {
+	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+	        LocalDate parsedDataInicio = LocalDate.parse(dataInicio, inputFormatter);
+	        LocalDate parsedDataFim = LocalDate.parse(dataFim, inputFormatter);
+
+	        ZonedDateTime dataInicioCompleta = parsedDataInicio.atStartOfDay(ZoneId.systemDefault());
+	        ZonedDateTime dataFimCompleta = parsedDataFim.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+
+	        List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
+
+	        return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	    } catch (DateTimeParseException e) {
+	        // Retorna uma resposta de requisição inválida se o formato da data for inválido
+	        logger.error("Error: Data inválida fornecida pelo usuário", e);
+	        return ResponseEntity.badRequest().build();
+	    } catch (Exception e) {
+	        logger.error("Error: Erro ao obter as transferências por período", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
 	}
+
 
 	// Retorna todas as transferências relacionadas a um operador específico
     // 4. Caso seja informado o nome do operador da transação, retornar todas as transferências relacionados à aquele operador.
@@ -196,15 +240,20 @@ public class TransferenciaController {
     @GetMapping("/periodo-operador")
     public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodoEOperador(
             @Parameter(description = "Data de início do período", example = "dd/MM/yyyy")
-            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
-            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim,
-            @Parameter(description = "Nome do operador", example = "Patrick")
-            @RequestParam String nomeOperador) {
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim,
+            @Parameter(description = "Nome do operador", example = "Patrick") @RequestParam String nomeOperador) {
+    	// Verifica se as datas fornecidas pelo usuário são inválidas
+	    if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
+	        logger.error("Error: Data inválida fornecida pelo usuário");
+	        return ResponseEntity.badRequest().build();
+	    }
         try {
-            LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
-            LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
+        	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			ZonedDateTime dataInicioCompleta = LocalDate.parse(dataInicio, formatter).atStartOfDay(ZoneId.systemDefault());
+			ZonedDateTime dataFimCompleta = LocalDate.parse(dataFim, formatter).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
 
-            List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodoEOperador(dataInicioCompleta, dataFimCompleta, nomeOperador);
+			List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodoEOperador(dataInicioCompleta, dataFimCompleta, nomeOperador);
 
 			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
@@ -262,18 +311,30 @@ public class TransferenciaController {
 	 * @throws TransferenciaException if an error occurs while retrieving the transactions.
 	 */
 	@GetMapping("/transacoes")
-	public ResponseEntity<List<Transferencia>> buscarTransacoesPorPeriodoENomeESeContaExiste(@RequestParam String nome,
-			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
-			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim) {
+	public ResponseEntity<List<Transferencia>> getTransacoesPorPeriodoENomeESeContaExiste(@RequestParam String nome,
+			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
+			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
+		
+		if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
+			logger.error("Error: Data inválida fornecida pelo usuário");
+			return ResponseEntity.badRequest().build();
+		}
 		try {
-			LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
-			LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			ZonedDateTime dataInicioCompleta = LocalDate.parse(dataInicio, formatter).atStartOfDay(ZoneId.systemDefault());
+			ZonedDateTime dataFimCompleta = LocalDate.parse(dataFim, formatter).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+
 			if (nome == null || nome.isEmpty()) {
 				throw new NomeVazioException("Exception: O nome não pode estar vazio");
 			}
-			if (dataInicio.isAfter(dataFim)) {
-				throw new DataInvalidaException("Exception: A data de início não pode ser posterior à data de fim");
+			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
+				// Retorna uma resposta de requisição inválida se a data de início for posterior à data de término
+				logger.error("A Data Inicial é Posterior a Data Fim");
+	            return ResponseEntity.badRequest().build();
 			}
+//			if (dataInicio.isAfter(dataFim)) {
+//				throw new DataInvalidaException("Exception: A data de início não pode ser posterior à data de fim");
+//			}
 			List<Transferencia> transacoes = contaService.buscarTransacoesPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
 			
 			return (transacoes != null && !transacoes.isEmpty()) ? ResponseEntity.ok(transacoes) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -327,6 +388,7 @@ public class TransferenciaController {
 		}
 	}
 	
+	// "1. A sua api deve fornecer os dados de transferência de acordo com o número da conta bacária."
 	// Obter o Saldo Total durante o periodo indicado.
 	// Big O(n)
 	/**
@@ -342,23 +404,31 @@ public class TransferenciaController {
 	 */
 	@GetMapping("/saldo-periodo")
 	public ResponseEntity<Double> calcularSaldoPeriodoPorNome(@RequestParam String nome,
-			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
-			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim) {
+			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
+			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
+		
+		if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
+			logger.error("Error: Data inválida fornecida pelo usuário");
+			return ResponseEntity.badRequest().build();
+		}
 		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			ZonedDateTime dataInicioCompleta = LocalDate.parse(dataInicio, formatter).atStartOfDay(ZoneId.systemDefault());
+			ZonedDateTime dataFimCompleta = LocalDate.parse(dataFim, formatter).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+
 			if (nome.isEmpty()) {
 				logger.warn("O nome está vazio");
 				return ResponseEntity.badRequest().build();
 			}
-			if (dataFim.isBefore(dataInicio)) {
-				logger.warn("A data de fim é anterior à data de início");
-				return ResponseEntity.badRequest().build();
+			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
+				// Retorna uma resposta de requisição inválida se a data de início for posterior à data de término
+				logger.error("A Data Inicial é Posterior a Data Fim");
+	            return ResponseEntity.badRequest().build();
 			}
-			LocalDateTime dataInicioCompleta = dataInicio.atStartOfDay();
-			LocalDateTime dataFimCompleta = dataFim.atTime(23, 59, 59);
 
 			double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nome);
 
-			return (saldoPeriodo >= 0) ? ResponseEntity.ok(saldoPeriodo) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+			return (saldoPeriodo >= 0 || saldoPeriodo <= 0) ? ResponseEntity.ok(saldoPeriodo) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		} catch (IllegalArgumentException e) {
 			logger.error("Argumento inválido fornecido ao calcular o saldo do período para o nome: " + nome, e);
 			return ResponseEntity.badRequest().build();

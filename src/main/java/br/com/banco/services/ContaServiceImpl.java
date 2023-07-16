@@ -1,10 +1,15 @@
 package br.com.banco.services;
 
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,12 +18,11 @@ import br.com.banco.entities.Transferencia;
 import br.com.banco.enums.Operation;
 import br.com.banco.repositories.ContaRepository;
 import br.com.banco.repositories.TransferenciaRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
 public class ContaServiceImpl implements ContaService {
+	
 	private static final Logger logger = LoggerFactory.getLogger(ContaServiceImpl.class);
 
 	private final ContaRepository contaRepository;
@@ -54,7 +58,8 @@ public class ContaServiceImpl implements ContaService {
 
             // Criar a transferência de saque
             Transferencia transferencia = new Transferencia();
-            transferencia.setDataTransferencia(LocalDateTime.now());
+//            transferencia.setDataTransferencia(LocalDateTime.now());
+            transferencia.setDataTransferencia(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")));
             transferencia.setValor(-valor);  // Define o valor como negativo
             transferencia.setTipo(Operation.SAQUE);
             transferencia.setConta(conta);
@@ -96,6 +101,10 @@ public class ContaServiceImpl implements ContaService {
         return contaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
     }
+    @Override
+    public Conta obterContaPorNome(String nome) {
+        return contaRepository.findByNomeIgnoreCaseLike(nome);
+    }
 //
 //    private Conta obterContaPorId(Long idConta) {
 //        return contaRepository.findById(idConta)
@@ -118,7 +127,8 @@ public class ContaServiceImpl implements ContaService {
 
             // Criar a transferência
             Transferencia transferencia = new Transferencia();
-            transferencia.setDataTransferencia(LocalDateTime.now());
+//            transferencia.setDataTransferencia(LocalDateTime.now());
+            transferencia.setDataTransferencia(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).withNano(0));
             transferencia.setValor(valor);
             transferencia.setTipo(tipo);
             transferencia.setConta(contaOrigem);
@@ -136,60 +146,106 @@ public class ContaServiceImpl implements ContaService {
         }
     }
     
+//    @Override
+//    public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
+//        return transferenciaRepository.buscarPorPeriodoENome(dataInicio, dataFim, nome);
+//    }
     @Override
-    public List<Transferencia> buscarTransacoesPorPeriodoENome(LocalDateTime dataInicio, LocalDateTime dataFim, String nome) {
-        return transferenciaRepository.buscarPorPeriodoENome(dataInicio, dataFim, nome);
+    public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
+        ZonedDateTime dataInicioCompleta = dataInicio.toLocalDate().atStartOfDay(dataInicio.getZone());
+        ZonedDateTime dataFimCompleta = dataFim.toLocalDate().atTime(LocalTime.MAX).atZone(dataFim.getZone());
+
+        return transferenciaRepository.buscarPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
     }
 
-	@Override
-	public double calcularSaldoTotalPorNome(String nome) {
-		if (nome == null) {
-			throw new IllegalArgumentException("Esse nome não foi encontrado.");
-		}
-		try {
-			Optional<Conta> optionalConta = contaRepository.findByNomeIgnoreCaseLike(nome);
-			if (optionalConta.isEmpty()) {
-				throw new IllegalArgumentException("Essa conta não foi encontrada.");
-			}
-			Conta conta = optionalConta.get();
-			return conta.getSaldo();
-		} catch (Exception e) {
-			logger.error("Ocorreu uma exceção durante o cálculo do saldo: {}", " '" + e.getMessage() + " '");
-
-			return 0.0;
-		}
-	}
 
     @Override
-    public double calcularSaldoPeriodoPorNome(LocalDateTime dataInicio, LocalDateTime dataFim, String nome) {
-        List<Transferencia> transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
-        double saldoPeriodo = 0.0;
-
-        for (Transferencia transferencia : transacoes) {
-            Operation tipoOperacao = transferencia.getTipo();
-            double valorOperacao = transferencia.getValor();
-
-            switch (tipoOperacao) {
-                case DEPOSITO:
-                case TRANSF_ENTRADA:
-                    saldoPeriodo += valorOperacao;
-                    break;
-                case SAQUE:
-                case TRANSF_SAIDA:
-                    saldoPeriodo -= valorOperacao;
-                    break;
-                default:
-                    // Lida com outros tipos de operações, se necessário
-                    break;
-            }
+    public double calcularSaldoTotalPorNome(String nome) {
+        if (nome == null) {
+            throw new IllegalArgumentException("Esse nome não foi encontrado.");
         }
-        
-     // Formatar o valor com duas casas decimais
-        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-        String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
-        saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
+        try {
+            Conta conta = obterContaPorNome(nome);
+            if (conta == null) {
+                throw new IllegalArgumentException("Essa conta não foi encontrada.");
+            }
+            double saldo = conta.getSaldo();
+            return saldo;
+        } catch (Exception e) {
+            logger.error("Ocorreu uma exceção durante o cálculo do saldo: {}", " '" + e.getMessage() + " '");
+            return 0.0;
+        }
+    }
 
 
-        return saldoPeriodo;
-    }   
+//    @Override
+//    public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
+//    	
+//    	List<Transferencia> transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
+//        double saldoPeriodo = 0.0;
+//
+//        for (Transferencia transferencia : transacoes) {
+//            Operation tipoOperacao = transferencia.getTipo();
+//            double valorOperacao = transferencia.getValor();
+//
+//            switch (tipoOperacao) {
+//                case DEPOSITO:
+//                case TRANSF_ENTRADA:
+//                    saldoPeriodo += valorOperacao;
+//                    break;
+//                case SAQUE:
+//                case TRANSF_SAIDA:
+//                    saldoPeriodo -= valorOperacao;
+//                    break;
+//                default:
+//                    // Lida com outros tipos de operações, se necessário
+//                    break;
+//            }
+//        }
+//     // Formatar o valor com duas casas decimais
+//        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+//        String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
+//        saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
+//
+//
+//        return saldoPeriodo;
+//    }   
+	@Override
+	public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
+	    List<Transferencia> transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
+	    
+	    // Obter o saldo atual da conta antes do período
+	    Double saldoInicial = contaRepository.findByNomeIgnoreCaseLike(nome, dataInicio);
+	    double saldoPeriodo = saldoInicial != null ? saldoInicial : 0.0;
+
+	    for (Transferencia transferencia : transacoes) {
+	        Operation tipoOperacao = transferencia.getTipo();
+	        double valorOperacao = transferencia.getValor();
+
+	        switch (tipoOperacao) {
+	            case DEPOSITO:
+	            case TRANSF_ENTRADA:
+	                saldoPeriodo += valorOperacao;
+	                break;
+	            case SAQUE:
+	            case TRANSF_SAIDA:
+	                saldoPeriodo -= valorOperacao;
+	                break;
+	            default:
+	                // Lida com outros tipos de operações, se necessário
+	                break;
+	        }
+	    }
+
+	    // Formatar o valor com duas casas decimais
+	    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+	    String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
+	    saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
+
+	    return saldoPeriodo;
+	}
+
+
+	
+	
 }

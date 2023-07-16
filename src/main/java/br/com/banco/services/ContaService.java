@@ -1,7 +1,9 @@
 package br.com.banco.services;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import br.com.banco.entities.Conta;
 import br.com.banco.entities.Transferencia;
@@ -18,9 +20,11 @@ public interface ContaService {
 
 	public Conta obterContaPorId(Long id);
 
-	public List<Transferencia> buscarTransacoesPorPeriodoENome(LocalDateTime dataInicio, LocalDateTime dataFim, String nome);
+	public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
 
 	public double calcularSaldoTotalPorNome(String nome);
 	
-	public double calcularSaldoPeriodoPorNome(LocalDateTime dataInicio, LocalDateTime dataFim, String nome);
+	public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
+
+	Conta obterContaPorNome(String nome);
 }

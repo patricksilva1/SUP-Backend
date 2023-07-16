@@ -1,6 +1,6 @@
 package br.com.banco.repositories;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -18,17 +18,21 @@ public interface TransferenciaRepository extends JpaRepository<Transferencia, Lo
 	
 	List<Transferencia> findByContaId(Long contaId);
 
-	List<Transferencia> findByDataTransferenciaBetween(LocalDateTime dataInicio, LocalDateTime dataFim);
+	List<Transferencia> findByDataTransferenciaBetween(ZonedDateTime dataInicio, ZonedDateTime dataFim);
 
 	@Query("SELECT t FROM Transferencia t WHERE t.conta.id = :numeroConta")
 	List<Transferencia> findByContaNumeroConta(Long numeroConta);
 	
-	@Query("SELECT t FROM Transferencia t WHERE LOWER(t.nomeOperadorTransacao) LIKE %:nomeOperador%")
+//	@Query("SELECT t FROM Transferencia t WHERE LOWER(t.nomeOperadorTransacao) LIKE %:nomeOperador%")
+//	List<Transferencia> findByNomeOperadorTransacao(@Param("nomeOperador") String nomeOperador);
+	@Query("SELECT t FROM Transferencia t WHERE LOWER(t.nomeOperadorTransacao) LIKE LOWER(CONCAT('%', :nomeOperador, '%'))")
 	List<Transferencia> findByNomeOperadorTransacao(@Param("nomeOperador") String nomeOperador);
 
-	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.nomeOperadorTransacao LIKE %:nomeOperador%")
-	List<Transferencia> findByDataInicioAndDataFimAndNomeOperador(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("nomeOperador") String nomeOperador);
+//	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.nomeOperadorTransacao LIKE %:nomeOperador%")
+//	List<Transferencia> findByDataInicioAndDataFimAndNomeOperador(@Param("dataInicio") ZonedDateTime dataInicio, @Param("dataFim") ZonedDateTime dataFim, @Param("nomeOperador") String nomeOperador);
+	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia BETWEEN :dataInicio AND :dataFim AND LOWER(t.nomeOperadorTransacao) LIKE LOWER(CONCAT('%', :nomeOperador, '%'))")
+	List<Transferencia> findByDataInicioAndDataFimAndNomeOperador(@Param("dataInicio") ZonedDateTime dataInicio, @Param("dataFim") ZonedDateTime dataFim, @Param("nomeOperador") String nomeOperador);
 
 	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.conta.nome LIKE %:nome%")
-	List<Transferencia> buscarPorPeriodoENome(@Param("dataInicio") LocalDateTime dataInicio, @Param("dataFim") LocalDateTime dataFim, @Param("nome") String nome);
+	List<Transferencia> buscarPorPeriodoENome(@Param("dataInicio") ZonedDateTime dataInicio, @Param("dataFim") ZonedDateTime dataFim, @Param("nome") String nome);
 }
