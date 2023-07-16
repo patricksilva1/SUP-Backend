@@ -1,6 +1,7 @@
 package br.com.banco.services;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -20,11 +21,11 @@ public interface TransferenciaService {
 
 	Page<Transferencia> getTransferenciasPaginadas(Pageable pageable);
 
-	List<Transferencia> getTransferenciasPorPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim);
+	List<Transferencia> getTransferenciasPorPeriodo(ZonedDateTime dataInicioCompleta, ZonedDateTime dataFimCompleta);
 
 	List<Transferencia> getTransferenciasPorOperador(String nomeOperador);
 
-	List<Transferencia> getTransferenciasPorPeriodoEOperador(LocalDateTime dataInicio, LocalDateTime dataFim, String nomeOperador);
+	List<Transferencia> getTransferenciasPorPeriodoEOperador(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nomeOperador);
 
 	Transferencia criarTransferencia(Transferencia transferencia);
 
@@ -33,4 +34,6 @@ public interface TransferenciaService {
 	public void sacar(Long idConta, double valor);
 	
 	public Conta obterContaPorId(Long id);
+
+	public boolean isValidDateFormat(String date);
 }

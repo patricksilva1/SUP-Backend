@@ -1,6 +1,10 @@
 package br.com.banco.services;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +38,7 @@ public class TransferenciaServiceImpl implements TransferenciaService {
     }
 
     @Override
-    public List<Transferencia> getTransferenciasPorPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim) {
+    public List<Transferencia> getTransferenciasPorPeriodo(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
         return transferenciaRepository.findByDataTransferenciaBetween(dataInicio, dataFim);
     }
 
@@ -44,7 +48,7 @@ public class TransferenciaServiceImpl implements TransferenciaService {
     }
     
     @Override
-    public List<Transferencia> getTransferenciasPorPeriodoEOperador(LocalDateTime dataInicio, LocalDateTime dataFim, String nomeOperador) {
+    public List<Transferencia> getTransferenciasPorPeriodoEOperador(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nomeOperador) {
         return transferenciaRepository.findByDataInicioAndDataFimAndNomeOperador(dataInicio, dataFim, nomeOperador);
     }
 
@@ -154,7 +158,8 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 
             // Criar a transferência de saque
             Transferencia transferencia = new Transferencia();
-            transferencia.setDataTransferencia(LocalDateTime.now());
+//            transferencia.setDataTransferencia(LocalDateTime.now());
+            transferencia.setDataTransferencia(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")));
             transferencia.setValor(-valor);  // Define o valor como negativo
             transferencia.setTipo(Operation.SAQUE);
             transferencia.setConta(conta);
@@ -174,5 +179,15 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 	@Override
 	public Conta obterContaPorId(Long id) {
 		return contaRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
+	}
+	
+	public boolean isValidDateFormat(String date) {
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	    try {
+	        LocalDate.parse(date, formatter);
+	        return true;
+	    } catch (DateTimeParseException e) {
+	        return false;
+	    }
 	}
 }
