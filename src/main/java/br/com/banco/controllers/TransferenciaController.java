@@ -124,7 +124,6 @@ public class TransferenciaController {
 	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
 		if (dataInicio == null || dataFim == null) {
 			logger.warn("Período de datas inválido: as datas de início e fim devem ser fornecidas.");
-			return null; // Ou retorne uma lista vazia, dependendo do comportamento desejado
 		}
 		try {
 	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -198,7 +197,6 @@ public class TransferenciaController {
             @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
             @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim,
             @Parameter(description = "Nome do operador", example = "Patrick") @RequestParam String nomeOperador) {
-    	
 	    if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
 	        logger.warn("Data inválida fornecida pelo usuário");
 	        return ResponseEntity.badRequest().build();
