@@ -2,6 +2,7 @@ package br.com.banco.services;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import br.com.banco.entities.Conta;
 import br.com.banco.entities.Transferencia;
@@ -18,7 +19,7 @@ public interface ContaService {
 
 	public Conta obterContaPorId(Long id);
 
-	public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
+	public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim,	String nome);
 
 	public double calcularSaldoTotalPorNome(String nome);
 
@@ -27,4 +28,12 @@ public interface ContaService {
 	Conta obterContaPorNome(String nome);
 
 	public List<Transferencia> buscarTransacoesPorNome(String nome);
+
+	public Map<String, Object> createErrorResponse(String errorMessage);
+
+	public boolean hasContaByName(String nome);
+
+	public boolean hasConta(Long id);
+	
+	public void validarParametros(Long idContaOrigem, Long idContaDestino, double valor, Operation tipo);
 }
