@@ -7,11 +7,9 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,44 +58,19 @@ public class ContaServiceImpl implements ContaService {
 
             // Criar a transferência de saque
             Transferencia transferencia = new Transferencia();
-//            transferencia.setDataTransferencia(LocalDateTime.now());
             transferencia.setDataTransferencia(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")));
             transferencia.setValor(-valor);  // Define o valor como negativo
             transferencia.setTipo(Operation.SAQUE);
             transferencia.setConta(conta);
             transferencia.setNomeOperadorTransacao("Sistema");
-
-            // Adicionar a transferência à lista de transferências da conta
             conta.adicionarTransferencia(transferencia);
 
-            // Salvar as alterações no banco de dados
-//            contaRepository.save(conta);
             transferenciaRepository.save(transferencia);
         } else {
             throw new IllegalArgumentException("Saldo insuficiente");
         }
     }
-
-
-
-    /**
-     * FUNCIONANDO
-     */
-//    @Override
-//    public void transferir(Long idContaOrigem, Long idContaDestino, double valor) {
-//        Conta contaOrigem = obterContaPorId(idContaOrigem);
-//        Conta contaDestino = obterContaPorId(idContaDestino);
-//        double saldoOrigem = contaOrigem.getSaldo();
-//        if (saldoOrigem >= valor) {
-//            double novoSaldoOrigem = saldoOrigem - valor;
-//            contaOrigem.setSaldo(novoSaldoOrigem);
-//            double novoSaldoDestino = contaDestino.getSaldo() + valor;
-//            contaDestino.setSaldo(novoSaldoDestino);
-//        } else {
-//            throw new IllegalArgumentException("Saldo insuficiente");
-//        }
-//    }
-    
+ 
     @Override
     public Conta obterContaPorId(Long id) {
         return contaRepository.findById(id)
@@ -107,11 +80,6 @@ public class ContaServiceImpl implements ContaService {
     public Conta obterContaPorNome(String nome) {
         return contaRepository.findByNomeIgnoreCaseLike(nome);
     }
-//
-//    private Conta obterContaPorId(Long idConta) {
-//        return contaRepository.findById(idConta)
-//                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
-//    }
     
     @Override
     public void transferir(Long idContaOrigem, Long idContaDestino, double valor, Operation tipo) {
@@ -129,7 +97,6 @@ public class ContaServiceImpl implements ContaService {
 
             // Criar a transferência
             Transferencia transferencia = new Transferencia();
-//            transferencia.setDataTransferencia(LocalDateTime.now());
             transferencia.setDataTransferencia(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).withNano(0));
             transferencia.setValor(valor);
             transferencia.setTipo(tipo);
@@ -161,7 +128,6 @@ public class ContaServiceImpl implements ContaService {
         return transferenciaRepository.buscarPorNome(nome);
     }
 
-
     @Override
     public double calcularSaldoTotalPorNome(String nome) {
         if (nome == null) {
@@ -175,47 +141,11 @@ public class ContaServiceImpl implements ContaService {
             double saldo = conta.getSaldo();
             return saldo;
         } catch (Exception e) {
-            logger.error("Ocorreu uma exceção durante o cálculo do saldo: {}", " '" + e.getMessage() + " '");
+            logger.warn("Ocorreu uma exceção durante o cálculo do saldo: {}", " '" + e.getMessage() + " '");
             return 0.0;
         }
     }
-    
-    //TODO: FUNCIONANDO PERFEITAMENTE
-//    @Override
-//    public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
-//        List<Transferencia> transacoes = buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
-//        
-//        double saldoPeriodo = 0.0;
-//
-//        for (Transferencia transferencia : transacoes) {
-//            Operation tipoOperacao = transferencia.getTipo();
-//            double valorOperacao = transferencia.getValor();
-//
-//            switch (tipoOperacao) {
-//                case DEPOSITO:
-//                case TRANSF_ENTRADA:
-//                    saldoPeriodo += valorOperacao;
-//                    break;
-//                case SAQUE:
-//                case TRANSF_SAIDA:
-//                    saldoPeriodo -= valorOperacao;
-//                    break;
-//                case TRANSFERENCIA:
-//                    saldoPeriodo += valorOperacao; // ou -= valorOperacao, dependendo do fluxo desejado
-//                    break;
-//                default:
-//                    // Lida com outros tipos de operações, se necessário
-//                    break;
-//            }
-//        }
-//
-//        // Formatar o valor com duas casas decimais
-//        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-//        String saldoPeriodoFormatado = decimalFormat.format(saldoPeriodo);
-//        saldoPeriodo = Double.parseDouble(saldoPeriodoFormatado);
-//
-//        return saldoPeriodo;
-//    }
+
     @Override
     public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
         List<Transferencia> transacoes;

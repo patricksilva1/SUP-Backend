@@ -73,11 +73,9 @@ public class TransferenciaController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Transfers found"), @ApiResponse(responseCode = "204", description = "No transfers found") })
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorConta(
 			@Parameter(description = "Número da conta", example = "12345") @PathVariable Long numeroConta) {
-
-		if (numeroConta == null) {
+		if (numeroConta == null || numeroConta <= 0) {
 			return ResponseEntity.badRequest().build();
 		}
-
 		List<Transferencia> transferencias = transferenciaService.getTransferenciasPorConta(numeroConta);
 
 		return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -124,21 +122,27 @@ public class TransferenciaController {
 	public ResponseEntity<List<Transferencia>> getTransferenciasPorPeriodo(
 	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataInicio,
 	        @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
-	    try {
+		if (dataInicio == null || dataFim == null) {
+			logger.warn("Período de datas inválido: as datas de início e fim devem ser fornecidas.");
+			return null; // Ou retorne uma lista vazia, dependendo do comportamento desejado
+		}
+		try {
 	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//	        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	        LocalDate parsedDataInicio = LocalDate.parse(dataInicio, inputFormatter);
 	        LocalDate parsedDataFim = LocalDate.parse(dataFim, inputFormatter);
 
 	        ZonedDateTime dataInicioCompleta = parsedDataInicio.atStartOfDay(ZoneId.systemDefault());
 	        ZonedDateTime dataFimCompleta = parsedDataFim.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
-
+	        if(dataInicioCompleta.isAfter(dataFimCompleta)) {
+				logger.warn("A Data Inicial é Posterior a Data Fim");
+	            return ResponseEntity.badRequest().build();
+			}
 	        List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
 
 			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		} catch (DateTimeParseException e) {
-			logger.error("Error: Data inválida fornecida pelo usuário", e);
+			logger.warn("Data inválida fornecida pelo usuário");
 			return ResponseEntity.badRequest().build();
 		} catch (Exception e) {
 			logger.error("Error: Erro ao obter as transferências por período", e);
@@ -196,7 +200,7 @@ public class TransferenciaController {
             @Parameter(description = "Nome do operador", example = "Patrick") @RequestParam String nomeOperador) {
     	
 	    if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
-	        logger.error("Error: Data inválida fornecida pelo usuário");
+	        logger.warn("Data inválida fornecida pelo usuário");
 	        return ResponseEntity.badRequest().build();
 	    }
         try {
@@ -231,7 +235,7 @@ public class TransferenciaController {
             @Parameter(description = "O tamanho da página", example = "10") @RequestParam int tamanhoPagina) {
 		try {
 			if (pagina < 0 || tamanhoPagina <= 0) {
-				logger.error("Caro usuário, você inseriu uma paginação errada.");
+				logger.warn("Caro usuário, você inseriu uma paginação errada.");
 				throw new IllegalArgumentException("Exception: Número de página ou tamanho de página inválido.");
 			}
 			Pageable pageable = PageRequest.of(pagina, tamanhoPagina);
@@ -267,7 +271,7 @@ public class TransferenciaController {
 			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
 		
 		if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
-			logger.error("Error: Data inválida fornecida pelo usuário");
+			logger.warn("Data inválida fornecida pelo usuário");
 			return ResponseEntity.badRequest().build();
 		}
 		try {
@@ -279,7 +283,7 @@ public class TransferenciaController {
 				throw new NomeVazioException("Exception: O nome não pode estar vazio");
 			}
 			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				logger.error("A Data Inicial é Posterior a Data Fim");
+				logger.warn("A Data Inicial é Posterior a Data Fim");
 	            return ResponseEntity.badRequest().build();
 			}
 			List<Transferencia> transacoes = contaService.buscarTransacoesPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
@@ -318,7 +322,7 @@ public class TransferenciaController {
 	public ResponseEntity<Double> calcularSaldoTotalPorNome(@RequestParam String nome) {
 		try {
 			if (nome == null || nome.isEmpty()) {
-				throw new IllegalArgumentException("O parâmetro 'nome' não pode ser nulo ou vazio.");
+				logger.warn("O parâmetro 'nome' não pode ser nulo ou vazio.");
 			}
 			Optional<Double> saldo = Optional.of(contaService.calcularSaldoTotalPorNome(nome));
 			if (!saldo.isPresent()) {
@@ -357,7 +361,7 @@ public class TransferenciaController {
 			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
 		
 		if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
-			logger.error("Error: Data inválida fornecida pelo usuário");
+			logger.warn("Data inválida fornecida pelo usuário");
 			return ResponseEntity.badRequest().build();
 		}
 		try {
@@ -370,7 +374,7 @@ public class TransferenciaController {
 				return ResponseEntity.badRequest().build();
 			}
 			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				logger.error("A Data Inicial é Posterior a Data Fim");
+				logger.warn("A Data Inicial é Posterior a Data Fim");
 	            return ResponseEntity.badRequest().build();
 			}
 			Double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nome);
@@ -406,12 +410,12 @@ public class TransferenciaController {
 		try {
 			logger.info("Iniciando operação de saque. Conta: {}, Valor: R${}", idConta, valor);
 			if (valor <= 0) {
-				logger.error("Valor inválido para saque. Conta: {}, Valor: R${}", idConta, valor);
+				logger.warn("Valor inválido para saque. Conta: {}, Valor: R${}", idConta, valor);
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 			}
 			Conta conta = contaService.obterContaPorId(idConta);
 			if (conta == null) {
-				logger.error("Conta não encontrada. Conta: {}", idConta);
+				logger.warn("Conta não encontrada. Conta: {}", idConta);
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 			}
 			contaService.sacar(idConta, valor);
