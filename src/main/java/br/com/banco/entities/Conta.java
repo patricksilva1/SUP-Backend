@@ -1,6 +1,5 @@
 package br.com.banco.entities;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +29,6 @@ public class Conta {
     @Column(name = "nome_responsavel")
     private String nome;
 
-//    @Column(name = "data_de_criacao")
-//    private LocalDateTime dataDeCriacao;
     @Column(name = "data_de_criacao", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private ZonedDateTime dataDeCriacao;
 
