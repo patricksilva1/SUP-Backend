@@ -51,10 +51,10 @@ public class ContaController {
         try {
             String nome = (String) requestBody.get("nome");
             if (nome == null || nome.isEmpty()) {
-                throw new IllegalArgumentException("O parâmetro 'nome' é obrigatório");
+                logger.warn("O parâmetro 'nome' é obrigatório");
             }
             if (contaService.hasContaByName(nome)) {
-                throw new IllegalArgumentException("A conta com o nome '" + nome + "' já existe");
+            	logger.warn("A conta com o nome '" + nome + "' já existe");
             }
             Conta novaConta = contaService.criarConta(nome);
             Map<String, Object> response = new HashMap<>();
