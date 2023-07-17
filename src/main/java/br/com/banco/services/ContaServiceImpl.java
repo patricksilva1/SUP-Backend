@@ -52,6 +52,7 @@ public class ContaServiceImpl implements ContaService {
         }
         try {
             Conta conta = new Conta(nome);
+            conta.setDataCriacaoaAdjusted(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).withNano(0));
             conta.setSaldo(0.0);
             return contaRepository.save(conta);
         } catch (Exception e) {

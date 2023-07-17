@@ -84,9 +84,22 @@ public class Conta {
         return transferencias;
     }
 
-    // Métodos auxiliares para gerenciamento de transferências
 
-    public void adicionarTransferencia(Transferencia transferencia) {
+    public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setDataDeCriacao(ZonedDateTime dataDeCriacao) {
+		this.dataDeCriacao = dataDeCriacao;
+	}
+
+	public void setTransferencias(List<Transferencia> transferencias) {
+		this.transferencias = transferencias;
+	}
+
+	// Métodos auxiliares para gerenciamento de transferências
+
+	public void adicionarTransferencia(Transferencia transferencia) {
         transferencias.add(transferencia);
         transferencia.setConta(this);
     }
