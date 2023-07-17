@@ -118,7 +118,7 @@ public class ContaServiceImpl implements ContaService {
                 conta.setSaldo(novoSaldo);
                 // Criar a transferência de saque
                 Transferencia transferencia = new Transferencia();
-                transferencia.setDataTransferencia(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")));
+                transferencia.setDataTransferencia(ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).withNano(0));
                 transferencia.setValor(-valor);  // Define o valor como negativo
                 transferencia.setTipo(Operation.SAQUE);
                 transferencia.setConta(conta);
