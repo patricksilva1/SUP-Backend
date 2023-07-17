@@ -4,7 +4,9 @@ import java.text.DecimalFormat;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -255,7 +257,31 @@ public class ContaServiceImpl implements ContaService {
 
         return saldoPeriodo;
     }
+    
+    public Map<String, Object> createErrorResponse(String errorMessage) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", errorMessage);
+        return errorResponse;
+    }
+    
+    public boolean hasContaByName(String nome) {
+        Conta conta = contaRepository.findByNomeIgnoreCaseLike(nome);
+        return conta != null;
+    }
+    
+    public boolean hasConta(Long id) {
+        return contaRepository.existsById(id);
+    }
 
-	
-	
+	public void validarParametros(Long idContaOrigem, Long idContaDestino, double valor, br.com.banco.enums.Operation tipo) {
+		if (idContaOrigem == null || idContaDestino == null) {
+			throw new IllegalArgumentException("IDs das contas de origem e destino devem ser fornecidos.");
+		}
+		if (valor <= 0) {
+			throw new IllegalArgumentException("O valor da transferência deve ser maior que zero.");
+		}
+		if (tipo == null) {
+			throw new IllegalArgumentException("O tipo de operação deve ser fornecido.");
+		}
+	}
 }
