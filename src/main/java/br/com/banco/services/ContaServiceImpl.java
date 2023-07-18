@@ -397,4 +397,10 @@ public class ContaServiceImpl implements ContaService {
 			throw new IllegalArgumentException("O tipo de operação deve ser fornecido.");
 		}
 	}
+
+	@Override
+	public Map<String, ZonedDateTime> encontrarPrimeiraEUltimaDataPorNomeOperador(String nomeOperador) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

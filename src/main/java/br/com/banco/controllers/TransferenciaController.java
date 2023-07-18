@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -387,6 +388,46 @@ public class TransferenciaController {
 		}
 	}
 
+	// Big O(1) because of date size.
+	/**
+	 * Retrieves the total balance for the specified period by name.
+	 *
+	 * @param nomeOperador The name of the operator.
+	 * @return ResponseEntity<Double> The response entity containing the total balance for the specified period.
+	 */
+	@Operation(summary = "Retorna o saldo total no período especificado por nome", description = "Retornar o saldo total no período especificado por nome.")
+	@GetMapping("/saldo-por-nome")
+	public ResponseEntity<Double> getSaldoPorNome(@RequestParam("nomeOperador") String nomeOperador) {
+	    if (nomeOperador == null || nomeOperador.isEmpty()) {
+	        logger.warn("O nome do operador está vazio");
+	        return ResponseEntity.badRequest().build();
+	    }
+	    Map<String, String> datas = transferenciaService.getPrimeiraEUltimaDataPorNomeOperador(nomeOperador);
+	    if (datas == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+	    String primeiraData = datas.get("primeiraData");
+	    String ultimaData = datas.get("ultimaData");
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	    try {
+	        LocalDate dataInicio = LocalDate.parse(primeiraData, formatter);
+	        LocalDate dataFim = LocalDate.parse(ultimaData, formatter);
+	        if (dataInicio.isAfter(dataFim)) {
+	            logger.warn("A data inicial é posterior à data fim");
+	            return ResponseEntity.badRequest().build();
+	        }
+	        ZonedDateTime dataInicioCompleta = dataInicio.atStartOfDay(ZoneId.systemDefault());
+	        ZonedDateTime dataFimCompleta = dataFim.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+
+	        Double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nomeOperador);
+	       
+	        return (saldoPeriodo!=null) ? ResponseEntity.ok(saldoPeriodo) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();   
+	    } catch (DataInvalidaException e) {
+	        logger.warn("Falha ao fazer parse das datas");
+	        return ResponseEntity.badRequest().build();
+	    }
+	}
+	
 	// Sacar e salvar nas transacoes.
 	// Big O(n)
 	/**

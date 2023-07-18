@@ -2,6 +2,7 @@ package br.com.banco.services;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,4 +36,8 @@ public interface TransferenciaService {
 	public Conta obterContaPorId(Long id);
 
 	public boolean isValidDateFormat(String date);
+
+	public Map<String, String> getPrimeiraEUltimaDataPorNomeOperador(String nomeOperador);
+	
+//	public Map<String, String> encontrarPrimeiraEUltimaDataPorNomeOperador(String nomeOperador);
 }

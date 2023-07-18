@@ -36,4 +36,6 @@ public interface ContaService {
 	public boolean hasConta(Long id);
 	
 	public void validarParametros(Long idContaOrigem, Long idContaDestino, double valor, Operation tipo);
+	
+	public Map<String, ZonedDateTime> encontrarPrimeiraEUltimaDataPorNomeOperador(String nomeOperador);
 }
