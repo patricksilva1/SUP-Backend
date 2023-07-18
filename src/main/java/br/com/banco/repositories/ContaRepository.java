@@ -1,6 +1,7 @@
 package br.com.banco.repositories;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,5 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
 
 	@Query("SELECT SUM(c.saldo) FROM Conta c WHERE LOWER(c.nome) LIKE LOWER(CONCAT('%', :nome, '%')) AND c.dataDeCriacao >= :dataInicio AND c.dataDeCriacao <= :dataFim")
 	Double findByNomeIgnoreCaseLikeAndDataDeCriacaoBetween(@Param("nome") String nome, @Param("dataInicio") ZonedDateTime dataInicio, @Param("dataFim") ZonedDateTime dataFim);
+
 }

@@ -2,6 +2,7 @@ package br.com.banco.repositories;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,4 +37,7 @@ public interface TransferenciaRepository extends JpaRepository<Transferencia, Lo
 
 	@Query("SELECT t FROM Transferencia t WHERE t.conta.nome LIKE %:nome%")
 	List<Transferencia> buscarPorNome(@Param("nome") String nome);
+	
+	@Query("SELECT MIN(t.dataTransferencia) AS primeiraData, MAX(t.dataTransferencia) AS ultimaData FROM Transferencia t WHERE LOWER(t.nomeOperadorTransacao) LIKE LOWER(CONCAT('%', :nomeOperador, '%'))")
+	Map<String, ZonedDateTime> findPrimeiraEUltimaDataPorNomeOperador(@Param("nomeOperador") String nomeOperador);
 }

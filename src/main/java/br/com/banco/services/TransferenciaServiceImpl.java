@@ -6,7 +6,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +151,7 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 	 */
 	@Override
 	public List<Transferencia> getTransferenciasPorOperador(String nomeOperador) {
-		try {
+		try {	        
 			return transferenciaRepository.findByNomeOperadorTransacao(nomeOperador);
 		} catch (Exception e) {
 			logger.warn("Erro ao obter as transferências por operador.");
@@ -172,7 +174,7 @@ public class TransferenciaServiceImpl implements TransferenciaService {
     public List<Transferencia> getTransferenciasPorPeriodoEOperador(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nomeOperador) {
         try {
             if (dataInicio == null || dataFim == null || dataInicio.isAfter(dataFim)) {
-                throw new IllegalArgumentException("As datas de início e fim devem ser fornecidas corretamente.");
+            	logger.warn("As datas de início e fim devem ser fornecidas corretamente.");
             }
 
             return transferenciaRepository.findByDataInicioAndDataFimAndNomeOperador(dataInicio, dataFim, nomeOperador);
@@ -384,13 +386,11 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 			if (contaOrigem.getSaldo() < transferencia.getValor()) {
 				logger.warn("Saldo insuficiente na conta de origem");
 			}
-
 			if (transferencia.getTipo() == Operation.TRANSF_SAIDA) {
 				transferencia.setNomeOperadorTransacao(contaDestino.getNome());
 			} else if (transferencia.getTipo() == Operation.TRANSF_ENTRADA) {
 				transferencia.setNomeOperadorTransacao(contaOrigem.getNome());
 			}
-
 			// Realizar a subtração do valor da conta de origem
 			double novoSaldoOrigem = contaOrigem.getSaldo() - transferencia.getValor();
 			if (novoSaldoOrigem < 0) {
@@ -416,6 +416,39 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 			logger.error("Ocorreu um erro ao realizar a transferência: " + e.getMessage());
 			throw new TransferenciaException("Erro ao realizar a transferência", e);
 		}
+	}
+
+	// Big O(1) because of date size.
+	/**
+	 * Obtém a primeira e a última data de um operador com base no nome do operador.
+	 *
+	 * @param nomeOperador o nome do operador a ser pesquisado
+	 * @return um map contendo a primeira e a última data do operador formatadas como strings,
+	 *         ou um map vazio se nenhum resultado for encontrado,
+	 *         ou null se a primeira ou a última data forem nulas
+	 */
+	public Map<String, String> getPrimeiraEUltimaDataPorNomeOperador(String nomeOperador) {
+		Map<String, ZonedDateTime> result = transferenciaRepository.findPrimeiraEUltimaDataPorNomeOperador(nomeOperador);
+		if (result == null || result.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		Map<String, String> datas = new HashMap<>();
+		ZonedDateTime primeiraData = result.get("primeiraData");
+		ZonedDateTime ultimaData = result.get("ultimaData");
+		if(primeiraData == null) {
+			return null;
+		}
+		if(ultimaData == null) {
+			return null;
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String primeiraDataFormatada = primeiraData.format(formatter);
+		String ultimaDataFormatada = ultimaData.format(formatter);
+
+		datas.put("primeiraData", primeiraDataFormatada);
+		datas.put("ultimaData", ultimaDataFormatada);
+
+		return datas;
 	}
 
 	/**
