@@ -171,7 +171,8 @@ public class TransferenciaController {
 			}
 			Optional<List<Transferencia>> transferencias = Optional.ofNullable(transferenciaService.getTransferenciasPorOperador(nomeOperador));
 
-			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			return transferencias.map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+
 		} catch (Exception e) {
 			logger.error("Ocorreu um erro ao obter as transferências do operador: {}", e.getMessage());
 
@@ -322,14 +323,11 @@ public class TransferenciaController {
 		try {
 			if (nome == null || nome.isEmpty()) {
 				logger.warn("O parâmetro 'nome' não pode ser nulo ou vazio.");
+				return ResponseEntity.badRequest().build();
 			}
-			Optional<Double> saldo = Optional.of(contaService.calcularSaldoTotalPorNome(nome));
-			if (!saldo.isPresent()) {
-				return ResponseEntity.notFound().build();
-			} else {
-				double saldoTotal = saldo.get();
-				return ResponseEntity.ok(saldoTotal);
-			}
+			Double saldo = contaService.calcularSaldoTotalPorNome(nome);
+			
+			return (saldo != null) ? ResponseEntity.ok(saldo) : ResponseEntity.notFound().build();
 		} catch (IllegalArgumentException e) {
 			logger.error("Argumento inválido fornecido: " + e.getMessage());
 			return ResponseEntity.badRequest().build();
