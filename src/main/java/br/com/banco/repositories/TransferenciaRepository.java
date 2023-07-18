@@ -32,9 +32,9 @@ public interface TransferenciaRepository extends JpaRepository<Transferencia, Lo
 	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia BETWEEN :dataInicio AND :dataFim AND LOWER(t.nomeOperadorTransacao) LIKE LOWER(CONCAT('%', :nomeOperador, '%'))")
 	List<Transferencia> findByDataInicioAndDataFimAndNomeOperador(@Param("dataInicio") ZonedDateTime dataInicio, @Param("dataFim") ZonedDateTime dataFim, @Param("nomeOperador") String nomeOperador);
 
-	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND t.conta.nome LIKE %:nome%")
+	@Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicio AND t.dataTransferencia <= :dataFim AND LOWER(t.conta.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
 	List<Transferencia> findByPeriodoENome(@Param("dataInicio") ZonedDateTime dataInicio, @Param("dataFim") ZonedDateTime dataFim, @Param("nome") String nome);
-
+	
 	@Query("SELECT t FROM Transferencia t WHERE t.conta.nome LIKE %:nome%")
 	List<Transferencia> findByNome(@Param("nome") String nome);
 	
