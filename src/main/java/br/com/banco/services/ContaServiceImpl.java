@@ -241,7 +241,7 @@ public class ContaServiceImpl implements ContaService {
 	    }
 	    ZonedDateTime dataInicioCompleta = dataInicio.toLocalDate().atStartOfDay(dataInicio.getZone());
 	    ZonedDateTime dataFimCompleta = dataFim.toLocalDate().atTime(LocalTime.MAX).atZone(dataFim.getZone());
-	    return transferenciaRepository.buscarPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
+	    return transferenciaRepository.findByPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
 	}
     
 	/**
@@ -256,7 +256,7 @@ public class ContaServiceImpl implements ContaService {
 	    if (nome == null) {
 	    	logger.warn("Nome não pode ser nulo");
 	    }
-	    return transferenciaRepository.buscarPorNome(nome);
+	    return transferenciaRepository.findByNome(nome);
 	}
 
 	/**
@@ -396,11 +396,5 @@ public class ContaServiceImpl implements ContaService {
 		if (tipo == null) {
 			throw new IllegalArgumentException("O tipo de operação deve ser fornecido.");
 		}
-	}
-
-	@Override
-	public Map<String, ZonedDateTime> encontrarPrimeiraEUltimaDataPorNomeOperador(String nomeOperador) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

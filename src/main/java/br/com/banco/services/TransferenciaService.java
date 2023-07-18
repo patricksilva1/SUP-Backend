@@ -15,29 +15,27 @@ import br.com.banco.entities.Transferencia;
 @Service
 @EnableJpaRepositories
 public interface TransferenciaService {
+	public Conta obterContaPorId(Long id);
+
 	List<Transferencia> getAllTransferencias();
+
+	public void sacar(Long idConta, double valor);
+
+	public boolean isValidDateFormat(String date);
+
+	Transferencia criarTransferencia(Transferencia transferencia);
 
 	List<Transferencia> getTransferenciasPorConta(Long numeroConta);
 
 	Page<Transferencia> getTransferenciasPaginadas(Pageable pageable);
 
-	List<Transferencia> getTransferenciasPorPeriodo(ZonedDateTime dataInicioCompleta, ZonedDateTime dataFimCompleta);
-
 	List<Transferencia> getTransferenciasPorOperador(String nomeOperador);
 
-	List<Transferencia> getTransferenciasPorPeriodoEOperador(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nomeOperador);
-
-	Transferencia criarTransferencia(Transferencia transferencia);
-
 	Transferencia atualizarTransferencia(Long id, Transferencia transferencia);
-	
-	public void sacar(Long idConta, double valor);
-	
-	public Conta obterContaPorId(Long id);
-
-	public boolean isValidDateFormat(String date);
 
 	public Map<String, String> getPrimeiraEUltimaDataPorNomeOperador(String nomeOperador);
-	
-//	public Map<String, String> encontrarPrimeiraEUltimaDataPorNomeOperador(String nomeOperador);
+
+	List<Transferencia> getTransferenciasPorPeriodo(ZonedDateTime dataInicioCompleta, ZonedDateTime dataFimCompleta);
+
+	List<Transferencia> getTransferenciasPorPeriodoEOperador(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nomeOperador);
 }
