@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,13 +75,16 @@ public class ContaServiceImpl implements ContaService {
     public void depositar(Long idConta, double valor) throws IllegalArgumentException, ContaNotFoundException {
         if (idConta == null) {
         	logger.warn("ID da conta inválido: o ID não pode ser nulo.");
+        	return;
         }
         if (valor <= 0) {
         	logger.warn("Valor inválido: o valor deve ser maior que zero.");
+        	return;
         }
         Conta conta = obterContaPorId(idConta);
         if (conta == null) {
         	logger.warn("Conta não encontrada para o ID: " + idConta);
+        	return;
         }
         try {
             double novoSaldo = conta.getSaldo() + valor;
@@ -108,10 +112,12 @@ public class ContaServiceImpl implements ContaService {
         }
         if (valor <= 0) {
         	logger.warn("Valor inválido: o valor deve ser maior que zero.");
+        	return;
         }
         Conta conta = obterContaPorId(idConta);
         if (conta == null) {
         	logger.warn("Conta não encontrada para o ID: " + idConta);
+        	return;
         }
         try {
             if (conta.getSaldo() >= valor) {
@@ -235,9 +241,11 @@ public class ContaServiceImpl implements ContaService {
 	public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome) {
 	    if (dataInicio == null || dataFim == null) {
 	    	logger.warn("Datas de início e fim devem ser fornecidas");
+	    	return Collections.emptyList();
 	    }
 	    if (dataInicio.isAfter(dataFim)) {
 	    	logger.warn("Data de início deve ser anterior ou igual à data de fim");
+	    	return Collections.emptyList();
 	    }
 	    ZonedDateTime dataInicioCompleta = dataInicio.toLocalDate().atStartOfDay(dataInicio.getZone());
 	    ZonedDateTime dataFimCompleta = dataFim.toLocalDate().atTime(LocalTime.MAX).atZone(dataFim.getZone());
@@ -274,6 +282,7 @@ public class ContaServiceImpl implements ContaService {
             Conta conta = obterContaPorNome(nome);
             if (conta == null) {
                 logger.warn("Essa conta não foi encontrada.");
+                return 0.0;
             }
             double saldo = conta.getSaldo();
             return saldo;
@@ -370,9 +379,11 @@ public class ContaServiceImpl implements ContaService {
 	public boolean hasConta(Long id) {
 		if (id == null) {
 			logger.warn("O Id não pode ser nulo");
+			return false;
 		}
     	if (id <= 0) {
 			logger.warn("O Id deve ser um número positivo.");
+			return false;
 		}
         return contaRepository.existsById(id);
     }

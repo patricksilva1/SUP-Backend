@@ -45,28 +45,25 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 	 */
 	@Override
 	public List<Transferencia> getAllTransferencias() throws TransferenciaException {
-		try {
-			List<Transferencia> transferencias = transferenciaRepository.findAll();
-			if (transferencias == null) {
-				throw new TransferenciaException("A lista de transferências retornou nula.");
-			}
-			if (transferencias.isEmpty()) {
-				throw new TransferenciaException("A lista de transferências está vazia.");
-			}
-			for (Transferencia transferencia : transferencias) {
-				if (transferencia == null) {
-					throw new TransferenciaException("Transferência nula encontrada na lista.");
-				}
-			}
+	    try {
+	        List<Transferencia> transferencias = transferenciaRepository.findAll();
+	        if (transferencias.isEmpty()) {
+	        	logger.warn("A lista de transferências está vazia.");
+	        }
+	        for (Transferencia transferencia : transferencias) {
+	            if (transferencia == null) {
+	            	logger.warn("Transferência nula encontrada na lista.");
+	            }
+	        }
 
-			return Collections.unmodifiableList(transferencias);
-		} catch (TransferenciaException e) {
-			logger.error("Erro ao obter todas as transferências: " + e.getMessage());
-			throw e;
-		} catch (Exception e) {
-			logger.error("Erro ao obter todas as transferências: " + e.getMessage());
-			throw new TransferenciaException("Erro ao obter todas as transferências.", e);
-		}
+	        return Collections.unmodifiableList(transferencias);
+	    } catch (TransferenciaException e) {
+	        logger.error("Erro ao obter todas as transferências: " + e.getMessage());
+	        throw e;
+	    } catch (Exception e) {
+	        logger.error("Erro ao obter todas as transferências: " + e.getMessage());
+	        throw new TransferenciaException("Erro ao obter todas as transferências.", e);
+	    }
 	}
 
 	/**
@@ -333,15 +330,18 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 			Conta conta = transferencia.getConta();
 			if (conta == null) {
 				logger.warn("Conta não encontrada na transferência");
+				return null;
 			}
 			Double saldoAtual = conta.getSaldo();
 			Operation tipo = transferencia.getTipo();
 			if (tipo == null) {
 				logger.warn("Tipo de operação não especificado na transferência");
+				return null;
 			}
 			Double valor = transferencia.getValor();
 			if (valor == null) {
 				logger.warn("Valor não especificado na transferência");
+				return null;
 			}
 			switch (tipo) {
 			case DEPOSITO:
