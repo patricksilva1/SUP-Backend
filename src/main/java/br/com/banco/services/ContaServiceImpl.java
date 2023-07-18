@@ -57,7 +57,7 @@ public class ContaServiceImpl implements ContaService {
             conta.setSaldo(0.0);
             return contaRepository.save(conta);
         } catch (Exception e) {
-            logger.error("Erro ao criar conta: " + e.getMessage());
+            logger.error("Erro ao criar conta: {}", e.getMessage());
             throw new ContaException("Erro ao criar conta.", e);
         }
     }
@@ -83,14 +83,14 @@ public class ContaServiceImpl implements ContaService {
         }
         Conta conta = obterContaPorId(idConta);
         if (conta == null) {
-        	logger.warn("Conta não encontrada para o ID: " + idConta);
+        	logger.warn("Conta não encontrada para esse ID: {}", idConta);
         	return;
         }
         try {
             double novoSaldo = conta.getSaldo() + valor;
             conta.setSaldo(novoSaldo);
-        } catch (Exception e) {
-            logger.error("Erro ao depositar valor na conta: " + e.getMessage());
+        }catch (ContaException e) {
+            logger.error("Erro ao depositar valor na conta: {}", e.getMessage());
             throw new ContaException("Erro ao depositar valor na conta.", e);
         }
     }
@@ -116,7 +116,7 @@ public class ContaServiceImpl implements ContaService {
         }
         Conta conta = obterContaPorId(idConta);
         if (conta == null) {
-        	logger.warn("Conta não encontrada para o ID: " + idConta);
+        	logger.warn("Conta não encontrada para esse ID.");
         	return;
         }
         try {
@@ -134,12 +134,11 @@ public class ContaServiceImpl implements ContaService {
                 transferenciaRepository.save(transferencia);
             } else {
                 throw new SaldoInsuficienteException("Saldo insuficiente para o saque.");
-            }
-        } catch (Exception e) {
-            logger.error("Erro ao sacar valor da conta: " + e.getMessage());
-            throw new ContaException("Erro ao sacar valor da conta.", e);
-        }
-    }
+			}
+		} catch (ContaException e) {
+		    logger.error("Erro ao sacar valor da conta: {}", e.getMessage());
+		}
+	}
 
     /**
      * Retrieves the account with the specified ID.
@@ -222,8 +221,14 @@ public class ContaServiceImpl implements ContaService {
 	        } else {
 	            throw new SaldoInsuficienteException("Saldo insuficiente na conta de origem para realizar a transferência.");
 	        }
+		} catch (ContaNotFoundException e) {
+	        logger.error("Conta não encontrada: {}", e.getMessage());
+	        throw e;
+	    } catch (SaldoInsuficienteException e) {
+	        logger.error("Saldo insuficiente para transferência: {}", e.getMessage());
+	        throw e;
 	    } catch (Exception e) {
-	        logger.error("Erro ao transferir valor entre contas: " + e.getMessage());
+	        logger.error("Erro ao transferir valor entre contas: {}", e.getMessage());
 	        throw new ContaException("Erro ao transferir valor entre contas.", e);
 	    }
 	}
@@ -284,8 +289,8 @@ public class ContaServiceImpl implements ContaService {
                 logger.warn("Essa conta não foi encontrada.");
                 return 0.0;
             }
-            double saldo = conta.getSaldo();
-            return saldo;
+
+            return conta.getSaldo();
         } catch (ContaNotFoundException e) {
             logger.warn("Conta não encontrada para o nome '{}'", nome);
             return 0.0;

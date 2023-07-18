@@ -48,7 +48,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("api/v1/transfers")
 public class TransferenciaController {
-
 	@Autowired
 	private TransferenciaRepository transferenciaRepository;
 	
@@ -59,6 +58,9 @@ public class TransferenciaController {
 	private ContaService contaService;
 
 	private static final Logger logger = LoggerFactory.getLogger(TransferenciaController.class);
+
+	private static final String DATA_INVALIDA_MESSAGE = "A Data Inicial é Posterior a Data Fim";
+	private static final String DATA_INVALIDA_PROVIDED = "Data inválida fornecida pelo usuário";
 
 	// "1. A sua api deve fornecer os dados de transferência de acordo com o número da conta bacária."
 	/**
@@ -135,14 +137,14 @@ public class TransferenciaController {
 	        ZonedDateTime dataInicioCompleta = parsedDataInicio.atStartOfDay(ZoneId.systemDefault());
 	        ZonedDateTime dataFimCompleta = parsedDataFim.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
 	        if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				logger.warn("A Data Inicial é Posterior a Data Fim");
+	        	logger.warn(DATA_INVALIDA_MESSAGE);
 	            return ResponseEntity.badRequest().build();
 			}
 	        List<Transferencia> transferencias = transferenciaService.getTransferenciasPorPeriodo(dataInicioCompleta, dataFimCompleta);
 
 			return (transferencias != null && !transferencias.isEmpty()) ? ResponseEntity.ok(transferencias) : ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		} catch (DateTimeParseException e) {
-			logger.warn("Data inválida fornecida pelo usuário");
+			logger.warn(DATA_INVALIDA_PROVIDED);
 			return ResponseEntity.badRequest().build();
 		} catch (Exception e) {
 			logger.error("Error: Erro ao obter as transferências por período", e);
@@ -200,7 +202,7 @@ public class TransferenciaController {
             @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim,
             @Parameter(description = "Nome do operador", example = "Patrick") @RequestParam String nomeOperador) {
 	    if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
-	        logger.warn("Data inválida fornecida pelo usuário");
+	    	logger.warn(DATA_INVALIDA_PROVIDED);
 	        return ResponseEntity.badRequest().build();
 	    }
         try {
@@ -271,7 +273,7 @@ public class TransferenciaController {
 			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
 		
 		if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
-			logger.warn("Data inválida fornecida pelo usuário");
+			logger.warn(DATA_INVALIDA_PROVIDED);
 			return ResponseEntity.badRequest().build();
 		}
 		try {
@@ -283,21 +285,21 @@ public class TransferenciaController {
 				throw new NomeVazioException("Exception: O nome não pode estar vazio");
 			}
 			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				logger.warn("A Data Inicial é Posterior a Data Fim");
+				logger.warn(DATA_INVALIDA_MESSAGE);
 	            return ResponseEntity.badRequest().build();
 			}
 			List<Transferencia> transacoes = contaService.buscarTransacoesPorPeriodoENome(dataInicioCompleta, dataFimCompleta, nome);
 			
 			return (transacoes != null && !transacoes.isEmpty()) ? ResponseEntity.ok(transacoes) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		} catch (NomeVazioException e) {
-			logger.error("Nome vazio: " + e.getMessage(), e);
-			throw e;
+		    logger.error("Nome vazio: " + e.getMessage(), e);
+		    throw new TransferenciaException("Erro ao buscar transações por período e nome: Nome vazio", e);
 		} catch (DataInvalidaException e) {
-			logger.error("Data inválida: " + e.getMessage(), e);
-			throw e;
+		    logger.error("Data inválida: " + e.getMessage(), e);
+		    throw new TransferenciaException("Erro ao buscar transações por período e nome: Data inválida", e);
 		} catch (Exception e) {
-			logger.error("Erro ao buscar transações por período e nome", e);
-			throw new TransferenciaException("Exception: Erro ao buscar transações por período e nome", e);
+		    logger.error("Erro ao buscar transações por período e nome: " + e.getMessage(), e);
+		    throw new TransferenciaException("Erro ao buscar transações por período e nome", e);
 		}
 	}
 
@@ -358,7 +360,7 @@ public class TransferenciaController {
 			@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") String dataFim) {
 		
 		if (!transferenciaService.isValidDateFormat(dataInicio) || !transferenciaService.isValidDateFormat(dataFim)) {
-			logger.warn("Data inválida fornecida pelo usuário");
+			logger.warn(DATA_INVALIDA_PROVIDED);
 			return ResponseEntity.badRequest().build();
 		}
 		try {
@@ -371,7 +373,7 @@ public class TransferenciaController {
 				return ResponseEntity.badRequest().build();
 			}
 			if(dataInicioCompleta.isAfter(dataFimCompleta)) {
-				logger.warn("A Data Inicial é Posterior a Data Fim");
+				logger.warn(DATA_INVALIDA_MESSAGE);
 	            return ResponseEntity.badRequest().build();
 			}
 			Double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(dataInicioCompleta, dataFimCompleta, nome);
