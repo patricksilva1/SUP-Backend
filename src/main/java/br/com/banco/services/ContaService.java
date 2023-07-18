@@ -11,31 +11,29 @@ import br.com.banco.enums.Operation;
 public interface ContaService {
 	Conta criarConta(String nome);
 
-	void depositar(Long idConta, double valor);
+	public boolean hasConta(Long id);
 
-	void sacar(Long idConta, double valor);
-
-	void transferir(Long idContaOrigem, Long idContaDestino, double valor, Operation tipo);
+	Conta obterContaPorNome(String nome);
 
 	public Conta obterContaPorId(Long id);
 
-	public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim,	String nome);
+	void sacar(Long idConta, double valor);
+
+	void depositar(Long idConta, double valor);
+
+	public boolean hasContaByName(String nome);
 
 	public double calcularSaldoTotalPorNome(String nome);
-
-	public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
-
-	Conta obterContaPorNome(String nome);
 
 	public List<Transferencia> buscarTransacoesPorNome(String nome);
 
 	public Map<String, Object> createErrorResponse(String errorMessage);
 
-	public boolean hasContaByName(String nome);
+	void transferir(Long idContaOrigem, Long idContaDestino, double valor, Operation tipo);
 
-	public boolean hasConta(Long id);
-	
 	public void validarParametros(Long idContaOrigem, Long idContaDestino, double valor, Operation tipo);
-	
-	public Map<String, ZonedDateTime> encontrarPrimeiraEUltimaDataPorNomeOperador(String nomeOperador);
+
+	public double calcularSaldoPeriodoPorNome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
+
+	public List<Transferencia> buscarTransacoesPorPeriodoENome(ZonedDateTime dataInicio, ZonedDateTime dataFim, String nome);
 }

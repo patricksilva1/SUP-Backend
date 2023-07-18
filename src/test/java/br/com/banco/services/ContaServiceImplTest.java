@@ -166,7 +166,7 @@ public class ContaServiceImplTest {
 		ZonedDateTime dataFim = ZonedDateTime.parse("2023-07-31T23:59:59Z");
 		String nome = "John Doe";
 		List<Transferencia> transacoes = new ArrayList<>();
-		when(transferenciaRepository.buscarPorPeriodoENome(dataInicio, dataFim, nome)).thenReturn(transacoes);
+		when(transferenciaRepository.findByPeriodoENome(dataInicio, dataFim, nome)).thenReturn(transacoes);
 
 		List<Transferencia> transacoesObtidas = contaService.buscarTransacoesPorPeriodoENome(dataInicio, dataFim, nome);
 
@@ -177,7 +177,7 @@ public class ContaServiceImplTest {
 	public void testBuscarTransacoesPorNome() {
 		String nome = "John Doe";
 		List<Transferencia> transacoes = new ArrayList<>();
-		when(transferenciaRepository.buscarPorNome(nome)).thenReturn(transacoes);
+		when(transferenciaRepository.findByNome(nome)).thenReturn(transacoes);
 
 		List<Transferencia> transacoesObtidas = contaService.buscarTransacoesPorNome(nome);
 
@@ -229,7 +229,7 @@ public class ContaServiceImplTest {
 		transferencia2.setValor(50.0);
 		transacoes.add(transferencia1);
 		transacoes.add(transferencia2);
-		when(transferenciaRepository.buscarPorNome(nome)).thenReturn(transacoes);
+		when(transferenciaRepository.findByNome(nome)).thenReturn(transacoes);
 
 		double saldoPeriodo = contaService.calcularSaldoPeriodoPorNome(null, null, nome);
 
