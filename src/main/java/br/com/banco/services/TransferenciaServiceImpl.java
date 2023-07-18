@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import br.com.banco.controllers.TransferenciaController;
 import br.com.banco.entities.Conta;
 import br.com.banco.entities.Transferencia;
 import br.com.banco.enums.Operation;
@@ -29,7 +28,7 @@ import br.com.banco.repositories.TransferenciaRepository;
 
 @Service
 public class TransferenciaServiceImpl implements TransferenciaService {
-	private static final Logger logger = LoggerFactory.getLogger(TransferenciaController.class);
+	private static final Logger logger = LoggerFactory.getLogger(TransferenciaServiceImpl.class);
 	
 	@Autowired
 	private TransferenciaRepository transferenciaRepository;
@@ -58,11 +57,8 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 
 	        return Collections.unmodifiableList(transferencias);
 	    } catch (TransferenciaException e) {
-	        logger.error("Erro ao obter todas as transferências: " + e.getMessage());
-	        throw e;
-	    } catch (Exception e) {
-	        logger.error("Erro ao obter todas as transferências: " + e.getMessage());
-	        throw new TransferenciaException("Erro ao obter todas as transferências.", e);
+	        logger.error("Erro ao obter todas as transferências: {}", e.getMessage());
+	        return Collections.emptyList();
 	    }
 	}
 
@@ -225,11 +221,11 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 
             return transferenciaRepository.save(transferencia);
 		} catch (TransferenciaException e) {
-			logger.error("Erro ao obter todas as transferências: " + e.getMessage());
+			logger.error("Erro ao obter todas as transferências: {}", e.getMessage());
 			throw e;
 		} catch (Exception e) {
-			logger.error("Ocorreu um erro ao criar a transferência: " + e.getMessage());
-			throw new TransferenciaException("Erro ao criar a transferência", e);
+		    logger.error("Ocorreu um erro ao criar a transferência: {}", e.getMessage());
+		    throw new TransferenciaException("Erro ao criar a transferência", e);
 		}
     }
    
@@ -406,15 +402,12 @@ public class TransferenciaServiceImpl implements TransferenciaService {
 			}
 			contaDestino.setSaldo(novoSaldoDestino);
 			contaRepository.save(contaDestino);
-		} catch (SaldoInsuficienteException e) {
-			logger.error("Erro ao realizar a transferência: " + e.getMessage());
-			throw e;
-		} catch (SaldoNegativoException e) {
-			logger.error("Erro ao realizar a transferência: " + e.getMessage());
-			throw e;
+		} catch (SaldoInsuficienteException | SaldoNegativoException e) {
+		    logger.error("Erro ao realizar a transferência: " + e.getMessage());
+		    throw e;
 		} catch (Exception e) {
-			logger.error("Ocorreu um erro ao realizar a transferência: " + e.getMessage());
-			throw new TransferenciaException("Erro ao realizar a transferência", e);
+		    logger.error("Ocorreu um erro ao realizar a transferência: " + e.getMessage());
+		    throw new TransferenciaException("Erro ao realizar a transferência", e);
 		}
 	}
 
